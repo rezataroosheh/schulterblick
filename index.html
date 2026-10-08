@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* Layout: full-bleed 3D stage, examiner strip on top, instrument cluster bottom-centre, wheel left, pedals right. */
+/* Layout: full-bleed 3D stage, examiner strip and rear-view mirror on top, side mirrors left/right, instrument cluster bottom-centre, wheel left, pedals right. */
 :root{
   --bg:#d9dde1; --panel:#eceff2; --card:#ffffff; --ink:#16191d; --muted:#59616a; --line:#c3c9cf;
   --key:#ffffff; --key-ink:#16191d; --glass:rgba(18,21,25,.8); --on-glass:#ffffff; --sky:#b9d3e6;
@@ -60,12 +60,25 @@ button.chip:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 #toast b{display:block;font:700 15px/1.25 var(--de);direction:ltr;text-align:left}
 #toast span{font-size:12.5px;line-height:1.55}
 
-#speedo{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);direction:ltr;display:flex;align-items:center;gap:10px;background:var(--glass);color:var(--on-glass);border-radius:14px;padding:6px 12px 7px}
-#speedo .num{min-width:62px;text-align:center}
-#kmh{font:700 38px/1 var(--de);font-variant-numeric:tabular-nums;display:block}
-#speedo small{font:500 12px/1 var(--de);opacity:.7}
-#speedo svg{width:22px;height:22px;fill:currentColor;opacity:.22}
-#speedo svg.on{fill:var(--yellow);opacity:1}
+#speedo{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);direction:ltr;display:flex;align-items:center;gap:6px;background:var(--glass);color:var(--on-glass);border-radius:18px;padding:6px 10px}
+#dial{display:block;width:92px;height:92px;fill:none;stroke:currentColor}
+#dial .tick{stroke-width:1.4;opacity:.75} #dial .tick.major{stroke-width:2.4;opacity:1}
+#dial text{fill:currentColor;stroke:none;text-anchor:middle;font-family:var(--de)}
+#dial .lbl{font-size:10px;font-weight:600;opacity:.8}
+#kmh{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums}
+#dial .unit{font-size:8px;opacity:.7}
+#needle{stroke:var(--red);stroke-width:2.6;stroke-linecap:round}
+#hub{fill:currentColor;stroke:none}
+#speedo .ind{width:22px;height:22px;fill:currentColor;opacity:.22}
+#speedo .ind.on{fill:var(--yellow);opacity:1}
+
+/* Mirrors are empty frames over the canvas; the render loop paints a mirrored camera view into each frame's inner box. */
+.mirror{display:block;padding:0;margin:0;border:5px solid #1d2024;border-radius:12px;background:transparent;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:border-color .15s}
+.mirror.on{border-color:var(--blue)}
+#mirC{width:min(46%,250px);aspect-ratio:3.4;border-radius:10px}
+.mirror.side{appearance:none;-webkit-appearance:none;position:absolute;bottom:122px;width:clamp(96px,30%,210px);aspect-ratio:1.55;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#mirL{left:10px} #mirR{right:10px}
+.mirror.side:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 
 #controls{direction:ltr;display:grid;gap:8px;padding:10px 16px 12px;background:var(--panel);
   grid-template-columns:repeat(4,1fr);grid-template-areas:"lookL blL blR lookR" "steer steer brake gas"}
@@ -98,10 +111,13 @@ button.chip:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
   #gas{background:color-mix(in srgb,var(--ink) 86%,transparent)}
   .key{height:46px}
   #brake,#gas,#steer{height:64px}
+  .mirror.side{bottom:150px;width:clamp(96px,17vw,200px)}
+  #dial{width:74px;height:74px}
 }
 @media (orientation:landscape) and (max-height:460px){
   #ex-fa{display:none} #ex-de{font-size:16px}
   .key small{display:none}
+  .mirror.side{width:110px} #mirC{width:min(30%,200px)}
 }
 
 .ov{position:absolute;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:16px;background:color-mix(in srgb,var(--bg) 62%,transparent);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
@@ -145,16 +161,23 @@ ul.log li.sev b::before{content:"✕ "}
     <div id="top">
       <div id="examiner" aria-live="polite"><span class="who">Prüfer</span><div class="say"><div id="ex-de"></div><div id="ex-fa"></div></div></div>
       <div id="chips">
-        <button class="chip" id="camBtn" type="button">Kamera: außen</button>
+        <button class="chip" id="camBtn" type="button">Kamera: innen</button>
         <div class="chip" id="score">Punkte <b id="pts">0</b><span id="mult"></span></div>
         <div class="chip" id="count">خطای سبک <b id="minor">۰</b><span id="sevwrap" hidden> | <span class="sev">جدی <b id="severe">۰</b></span></span></div>
       </div>
+      <div class="mirror" id="mirC" role="img" aria-label="Innenspiegel"></div>
       <div id="toast" role="status"><b></b><span></span></div>
     </div>
+    <button class="mirror side" id="mirL" type="button" aria-label="Spiegel links"></button>
+    <button class="mirror side" id="mirR" type="button" aria-label="Spiegel rechts"></button>
     <div id="speedo">
-      <svg id="indL" viewBox="0 0 24 24"><path d="M11 4 2 12l9 8v-5h10V9H11z"/></svg>
-      <div class="num"><span id="kmh">0</span><small>km/h</small></div>
-      <svg id="indR" viewBox="0 0 24 24"><path d="m13 4 9 8-9 8v-5H3V9h10z"/></svg>
+      <svg class="ind" id="indL" viewBox="0 0 24 24"><path d="M11 4 2 12l9 8v-5h10V9H11z"/></svg>
+      <svg id="dial" viewBox="0 0 100 100" role="img" aria-label="Tachometer">
+        <g id="ticks"></g>
+        <line id="needle" x1="44" y1="50" x2="88" y2="50"/><circle id="hub" cx="50" cy="50" r="4.5"/>
+        <text id="kmh" x="50" y="80">0</text><text class="unit" x="50" y="92">km/h</text>
+      </svg>
+      <svg class="ind" id="indR" viewBox="0 0 24 24"><path d="m13 4 9 8-9 8v-5H3V9h10z"/></svg>
     </div>
   </div>
 
@@ -176,13 +199,14 @@ ul.log li.sev b::before{content:"✕ "}
       <h1>تمرین آزمون عملی رانندگی، سه‌بعدی</h1>
       <p id="introText">ممتحن به آلمانی مسیر می‌دهد. فرمان، گاز و ترمز با شماست و هر خطا مثل امتحان واقعی ثبت می‌شود.</p>
       <ol class="rules">
-        <li>قبل از راه افتادن، پیچیدن و کنار زدن: اول <span class="de">Blinker</span>، بعد <span class="de">Schulterblick</span> همان سمت. دوربین واقعاً به عقب می‌چرخد.</li>
+        <li>قبل از راه افتادن، پیچیدن و کنار زدن به این ترتیب: <span class="de">Spiegel</span> (آینهٔ بغل همان سمت)، <span class="de">Blinker</span>، <span class="de">Schulterblick</span>. دوربین واقعاً به عقب می‌چرخد.</li>
+        <li>آینهٔ بغل نقطهٔ کور دارد. دوچرخه‌ای که درست کنار ماشین است فقط با <span class="de">Schulterblick</span> دیده می‌شود.</li>
         <li>سرعت مجاز را از تابلوها بخوانید. جایی نوشته نمی‌شود.</li>
         <li>چراغ قرمز، تابلوی ایست، حق تقدم، تصادف و رفتن روی پیاده‌رو خطای جدی‌اند و یعنی مردود.</li>
         <li>هر مانور بی‌نقص امتیاز دارد و با هر مانور درستِ پشت‌سرهم ضریب بالا می‌رود. یک خطا ضریب را صفر می‌کند.</li>
       </ol>
-      <p class="hint touch-hint">فرمان: دایرهٔ فرمان را بگیرید و به چپ یا راست بکشید. گاز و ترمز را نگه دارید.</p>
-      <p class="hint keys-hint">صفحه‌کلید: ↑ گاز، ↓ ترمز، ← → فرمان، <span class="de">Q</span> و <span class="de">E</span> راهنمای چپ و راست، <span class="de">1</span> و <span class="de">3</span> نگاه از روی شانهٔ چپ و راست، <span class="de">V</span> دوربین.</p>
+      <p class="hint touch-hint">فرمان: دایرهٔ فرمان را بگیرید و به چپ یا راست بکشید. گاز و ترمز را نگه دارید. برای نگاه در آینه روی آینهٔ بغل بزنید.</p>
+      <p class="hint keys-hint">صفحه‌کلید: ↑ گاز، ↓ ترمز، ← → فرمان، <span class="de">Q</span> و <span class="de">E</span> راهنمای چپ و راست، <span class="de">2</span> و <span class="de">3</span> نگاه در آینهٔ چپ و راست، <span class="de">1</span> و <span class="de">4</span> نگاه از روی شانهٔ چپ و راست، <span class="de">V</span> دوربین. آینه‌ها را با ماوس هم می‌شود زد.</p>
       <label class="opt" style="margin-bottom:4px"><input type="checkbox" id="sound" checked> صدای موتور، راهنما و امتیاز</label>
       <label class="opt"><input type="checkbox" id="voice"> ممتحن با صدا حرف بزند (آلمانی)</label>
       <div class="btns"><button class="btn" id="startBtn" type="button">شروع آزمون</button></div>
@@ -329,6 +353,8 @@ const ERR = {
   end_look:['Anhalten ohne Schulterblick','قبل از کنار زدن از روی شانهٔ راست نگاه نکردید.'],
   end_far:['Zu weit vom Fahrbahnrand gehalten','برای توقف باید نزدیک جدول سمت راست بایستید.'],
   end_missed:['Anweisung nicht befolgt','در جایی که ممتحن خواست توقف نکردید.'],
+  mirror_none:['Spiegelblick unterlassen','پیش از این مانور در آینهٔ بغلِ همان سمت نگاه نکردید.'],
+  order:['Reihenfolge nicht eingehalten: Spiegel – Blinker – Schulterblick','ترتیب درست: اول آینه، بعد راهنما، بعد نگاه از روی شانه.'],
 };
 
 /* ---------- 3D scene ---------- */
@@ -493,9 +519,37 @@ function makePed(){
 buildWorld();
 const player=makeCar(0xf4f2ec,true); scene.add(player);
 
+// cockpit, seen only from the driver's seat (car-local: x forward, y up, z right; the driver sits at z=-0.36)
+const cockpit=new THREE.Group(), wheel=new THREE.Group();
+{ const dash=lam(0x2a2d32), trim=lam(0x1b1d20), add=(geo,m,x,y,z,p=cockpit)=>{ const o=new THREE.Mesh(geo,m); o.position.set(x,y,z); p.add(o); return o; };
+  add(new THREE.BoxGeometry(0.56,0.28,1.72),dash,0.96,0.84,0);                      // dashboard
+  add(new THREE.BoxGeometry(2.28,0.02,1.8),trim,-0.46,0.94,0);                     // cabin floor, hides the body's top face
+  add(new THREE.BoxGeometry(1.18,0.03,1.64),dash,0.09,1.51,0);                      // headliner, short enough to stay out of the rear-view mirror
+  for(const z of [-0.78,0.78]) add(new THREE.BoxGeometry(0.045,0.85,0.045),trim,0.88,1.24,z).rotation.z=0.967;   // A-pillars, windscreen base to roof
+  const pivot=new THREE.Group(); pivot.position.set(0.48,0.86,-0.36); pivot.rotation.z=-0.44; pivot.add(wheel); cockpit.add(pivot);
+  const rim=new THREE.TorusGeometry(0.15,0.019,8,32); rim.rotateY(Math.PI/2); add(rim,trim,0,0,0,wheel);
+  add(new THREE.BoxGeometry(0.025,0.025,0.28),trim,0,0,0,wheel); add(new THREE.BoxGeometry(0.025,0.14,0.025),trim,0,-0.07,0,wheel);
+  add(new THREE.CylinderGeometry(0.042,0.042,0.04,12).rotateZ(Math.PI/2),dash,0,0,0,wheel); }
+player.add(cockpit);
+
+// mirrors: car-mounted cameras render into small textures, which are pasted, flipped, into the mirror frames
+const hudScene=new THREE.Scene(), hudCam=new THREE.OrthographicCamera(0,1,0,-1,-1,1);
+const MIRS=[['mirC',[0.5,1.36,0],[-1,-0.02,0],50],['mirL',[0.72,1.04,-1],[-1,-0.03,-0.05],28],['mirR',[0.72,1.04,1],[-1,-0.03,0.05],28]].map(([id,p,d,hfov])=>{
+  const c=new THREE.PerspectiveCamera(20,1,0.2,260); c.position.set(p[0],p[1],p[2]);
+  c.quaternion.setFromRotationMatrix(new THREE.Matrix4().lookAt(new THREE.Vector3(),new THREE.Vector3(d[0],d[1],d[2]),new THREE.Vector3(0,1,0)));
+  player.add(c);
+  const rt=new THREE.WebGLRenderTarget(16,16); rt.texture.repeat.set(-1,1); rt.texture.offset.set(1,0);
+  const quad=new THREE.Mesh(new THREE.PlaneGeometry(1,1),bas(0xffffff,{map:rt.texture,depthTest:false,depthWrite:false})); hudScene.add(quad);
+  return {el:$(id),cam:c,rt,quad,hfov,w:0,h:0};
+});
+{ const g=$('ticks'), P=(a,r)=>[50+r*Math.cos(a),50+r*Math.sin(a)];
+  for(let v=0;v<=80;v+=10){ const a=(150+v*3)*Math.PI/180, major=v%20===0, [x0,y0]=P(a,44), [x1,y1]=P(a,major?36:39);
+    g.insertAdjacentHTML('beforeend',`<line class="tick${major?' major':''}" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/>`);
+    if(major){ const [tx,ty]=P(a,27); g.insertAdjacentHTML('beforeend',`<text class="lbl" x="${tx.toFixed(1)}" y="${(ty+3.5).toFixed(1)}">${v}</text>`); } } }
+
 /* ---------- state ---------- */
 const keys={gas:false,brake:false,left:false,right:false};
-let st, touchSteer=null, camMode='chase', camYaw=0, lookO=0, W=360, H=520;
+let st, touchSteer=null, camMode='cockpit', camYaw=0, lookO=0, W=360, H=520;
 const CARCOL=[0x3d6ea8,0xb5503c,0xd9a441,0x2f7d6b,0x6b7a85,0x8a5a8f];
 const mkCar=(path,s,vmax,color)=>({kind:'car',path,s,v:vmax,vmax,color,acc:2,dec:2.5,brakeMax:6,stopS:null,hold:false,gapFn:null,dead:false});
 function addActor(a){ a.mesh=a.kind==='car'?makeCar(a.color):a.kind==='bike'?makeBike():makePed(); scene.add(a.mesh); st.actors.push(a); return a; }
@@ -503,7 +557,7 @@ function addActor(a){ a.mesh=a.kind==='car'?makeCar(a.color):a.kind==='bike'?mak
 function reset(){
   if(st) for(const a of st.actors) scene.remove(a.mesh);
   const q=pathAt(ROUTE,0,1.5);
-  st={ mode:'intro', T:0, x:q.x, y:q.y, phi:Math.atan2(q.hy,q.hx), v:0, steer:0, s:0, prog:0, lat:1.5, blink:0, look:0, lookUntil:0, lastLook:{'-1':-99,'1':-99}, brakeT:0,
+  st={ mode:'intro', T:0, x:q.x, y:q.y, phi:Math.atan2(q.hy,q.hx), v:0, steer:0, s:0, prog:0, lat:1.5, blink:0, look:0, lookUntil:0, lastLook:{'-1':-99,'1':-99}, lastMir:{'-1':-99,'1':-99}, blinkOn:{'-1':-99,'1':-99}, mirAtBlink:{'-1':-99,'1':-99}, brakeT:0,
     errors:[], ev:{}, actors:[], cx:[], on:[], aR:null, bL:null, cyc:null, light:'green', lightT:0,
     overT:0, lastSpeedErr:-99, sevT:0, stopT:0, dStopT:0, endStopT:0, laneT:0, lastLane:-99, lastCurb:-99, offT:0, ghostUntil:0, score:0, streak:0, mark:0 };
   const S=st;
@@ -588,12 +642,19 @@ function hits(a){
   for(const m of mine) for(const t of theirs) if(Math.hypot(m[0]-t[0],m[1]-t[1])<lim) return true;
   return false;
 }
+const MIRWIN=20;                                          // a mirror glance counts for this many seconds
+function routine(side,win,lookId){                        // Spiegel – Blinker – Schulterblick, each in time and in that order
+  const S=st, on=S.blink===side?S.blinkOn[side]:null; let order=false;
+  if(S.T-S.lastMir[side]>MIRWIN) err('mirror_none'); else if(on!==null && on-S.mirAtBlink[side]>MIRWIN) order=true;
+  if(S.T-S.lastLook[side]>win) err(lookId); else if(on!==null && S.lastLook[side]<on) order=true;
+  if(order) err('order');
+}
 function turnChk(n,side,X,kmh){
   const S=st, k='late'+Math.round(n.sArc);
   if(X(n.sArc-15) && S.blink!==side) S.ev[k]=1;
   if(X(n.sArc+0.5)){
     if(S.blink!==side) err('blinker_none'); else if(S.ev[k]) err('blinker_late');
-    if(S.T-S.lastLook[side]>6) err('look_none');
+    routine(side,6,'look_none');
     if(kmh>(side>0?22:28)) err('turn_fast');
   }
   if(X(n.sArcEnd+3) && S.blink===side) S.blink=0;
@@ -630,7 +691,7 @@ function update(dt){
   // pulling away from the kerb
   if(!S.ev.start && p1>0.8){ S.ev.start=1;
     if(S.blink!==-1) err('start_blinker');
-    if(S.T-S.lastLook[-1]>6) err('start_look');
+    routine(-1,6,'start_look');
     const rel=S.pass.s-40-p1; if(!S.pass.dead && rel>-30 && rel<6) err('start_traffic'); }
   if(X(16) && S.blink===-1) S.blink=0;
   if(X(20)) award('start');
@@ -705,7 +766,7 @@ function update(dt){
   // pulling over at the end
   if(s>END0-4 && !S.ev.done){
     if(S.v<0.2){ S.endStopT+=dt; if(S.endStopT>0.7){
-      if(S.blink!==1) err('end_blinker'); if(S.T-S.lastLook[1]>8) err('end_look');
+      if(S.blink!==1) err('end_blinker'); routine(1,8,'end_look');
       if(S.lat<0.7) err('end_far'); else if(S.lat>1.8) err('curb');
       finish(); } } else S.endStopT=0;
     if(!S.ev.done && s>END1+8){ err('end_missed'); finish(); }
@@ -737,15 +798,33 @@ function camera3(dt){
     cam.lookAt(S.x+Math.cos(camYaw)*ahead, 1.15, S.y+Math.sin(camYaw)*ahead);
   } else {
     const c=Math.cos(S.phi), n=Math.sin(S.phi), ex=S.x+c*0.1+n*0.36, ey=S.y+n*0.1-c*0.36, a=S.phi+lookO;
-    cam.position.set(ex,1.24,ey); cam.lookAt(ex+Math.cos(a)*10,1.0,ey+Math.sin(a)*10);
+    cam.position.set(ex,1.24,ey); cam.lookAt(ex+Math.cos(a)*10,1.12,ey+Math.sin(a)*10);
   }
+  cockpit.visible=!chase; wheel.rotation.x=S.steer*2.2;
   const base=chase?60+8*Math.min(1,S.v/18):72, asp=W/H;
   const fov=clamp(Math.max(base, 2*Math.atan(Math.tan(34*Math.PI/180)/asp)*180/Math.PI),40,92);
   if(Math.abs(fov-cam.fov)>0.05){ cam.fov=fov; cam.updateProjectionMatrix(); }
 }
+let mirTick=0, avgDt=1/60;
+function mirrors(dt){
+  const cr=cv.getBoundingClientRect(), pr=renderer.getPixelRatio();
+  avgDt+=(dt-avgDt)*0.05; const fresh=avgDt<0.024 || ++mirTick%2===0;     // on slow devices the mirrors refresh every other frame
+  for(const m of MIRS){
+    const r=m.el.getBoundingClientRect(), w=m.el.clientWidth, h=m.el.clientHeight;
+    m.quad.visible=w>0 && h>0; if(!m.quad.visible) continue;
+    m.quad.position.set(r.left-cr.left+m.el.clientLeft+w/2, -(r.top-cr.top+m.el.clientTop+h/2), 0); m.quad.scale.set(w,h,1);
+    const tw=Math.round(w*pr*0.75), th=Math.round(h*pr*0.75);
+    if(tw!==m.w || th!==m.h){ m.w=tw; m.h=th; m.rt.setSize(tw,th);
+      m.cam.aspect=w/h; m.cam.fov=2*Math.atan(Math.tan(m.hfov*Math.PI/360)/m.cam.aspect)*180/Math.PI; m.cam.updateProjectionMatrix(); }
+    if(fresh){ renderer.setRenderTarget(m.rt); renderer.render(scene,m.cam); }
+  }
+  renderer.setRenderTarget(null);
+}
 let lastPh=false;
 function hud(){
-  const S=st, ph=(S.T*2.6%1)<0.5; $('kmh').textContent=Math.round(S.v*3.6);
+  const S=st, ph=(S.T*2.6%1)<0.5, kmh=S.v*3.6; $('kmh').textContent=Math.round(kmh);
+  $('needle').setAttribute('transform',`rotate(${(150+Math.min(kmh,80)*3).toFixed(1)} 50 50)`);
+  $('mirL').classList.toggle('on',S.T-S.lastMir[-1]<0.8); $('mirR').classList.toggle('on',S.T-S.lastMir[1]<0.8);
   if(S.blink && S.mode==='run' && ph!==lastPh) sfx('tick'); lastPh=ph;
   if(ac && engGain){ const on=S.mode==='run' && $('sound').checked; eng.frequency.value=46+S.v*7+(keys.gas?9:0); engGain.gain.value=on?0.03+(keys.gas?0.02:0):0; }
   $('blL').className='key blink'+(S.blink===-1?' on'+(ph?'':' dim'):'');
@@ -756,8 +835,10 @@ function hud(){
 }
 
 /* ---------- input ---------- */
-const doBlink=side=>{ if(st.mode==='run') st.blink=st.blink===side?0:side; };
+const doBlink=side=>{ const S=st; if(S.mode!=='run') return;
+  if(S.blink===side) S.blink=0; else { S.blink=side; S.blinkOn[side]=S.T; S.mirAtBlink[side]=S.lastMir[side]; } };
 const doLook=side=>{ if(st.mode==='run'){ st.look=side; st.lookUntil=st.T+1.5; st.lastLook[side]=st.T; } };
+const doMirror=side=>{ if(st.mode==='run') st.lastMir[side]=st.T; };
 function toggleCam(){ camMode=camMode==='chase'?'cockpit':'chase'; $('camBtn').textContent='Kamera: '+(camMode==='chase'?'außen':'innen'); }
 function hold(el,k){
   const dn=e=>{ e.preventDefault(); if(st.mode==='run') keys[k]=true; try{ el.setPointerCapture(e.pointerId); }catch(_){} }, up=()=>{ keys[k]=false; };
@@ -767,6 +848,7 @@ function hold(el,k){
 const tap=(el,fn)=>{ el.addEventListener('pointerdown',e=>{ e.preventDefault(); fn(); }); el.addEventListener('contextmenu',e=>e.preventDefault()); };
 hold($('gas'),'gas'); hold($('brake'),'brake');
 tap($('blL'),()=>doBlink(-1)); tap($('blR'),()=>doBlink(1)); tap($('lookL'),()=>doLook(-1)); tap($('lookR'),()=>doLook(1));
+tap($('mirL'),()=>doMirror(-1)); tap($('mirR'),()=>doMirror(1));
 $('camBtn').addEventListener('click',toggleCam);
 { const pad=$('steer'), knob=$('knob'); let id=null, x0=0;
   pad.addEventListener('pointerdown',e=>{ e.preventDefault(); if(st.mode!=='run') return; id=e.pointerId; x0=e.clientX; touchSteer=0; try{ pad.setPointerCapture(id); }catch(_){} });
@@ -779,7 +861,8 @@ window.addEventListener('keydown',e=>{
   if(k){ keys[k]=true; e.preventDefault(); return; }
   if(e.repeat) return;
   if(e.code==='KeyQ') doBlink(-1); else if(e.code==='KeyE') doBlink(1);
-  else if(e.code==='Digit1'||e.code==='Numpad1') doLook(-1); else if(e.code==='Digit3'||e.code==='Numpad3') doLook(1);
+  else if(e.code==='Digit1'||e.code==='Numpad1') doLook(-1); else if(e.code==='Digit4'||e.code==='Numpad4') doLook(1);
+  else if(e.code==='Digit2'||e.code==='Numpad2') doMirror(-1); else if(e.code==='Digit3'||e.code==='Numpad3') doMirror(1);
   else if(e.code==='KeyV') toggleCam();
 });
 window.addEventListener('keyup',e=>{ const k=KEYMAP[e.code]; if(k) keys[k]=false; });
@@ -801,18 +884,20 @@ function resize(){
   W=stage.clientWidth||360; H=stage.clientHeight||520;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.setSize(W,H,false);
   cam.aspect=W/H; cam.updateProjectionMatrix();
+  hudCam.right=W; hudCam.bottom=-H; hudCam.updateProjectionMatrix();
 }
 window.addEventListener('resize',resize);
 let last=0;
 function frame(t){
   const dt=Math.min(0.05,Math.max(0,(t-last)/1000)); last=t;
   if(st.mode==='run') update(dt);
-  sync(); camera3(dt); renderer.render(scene,cam); hud();
+  sync(); camera3(dt); mirrors(dt);
+  renderer.render(scene,cam); renderer.autoClear=false; renderer.render(hudScene,hudCam); renderer.autoClear=true; hud();
   requestAnimationFrame(frame);
 }
 reset(); resize();
 $('ex-de').textContent=SAY[0][0]; $('ex-fa').textContent=SAY[0][1];
-window.__game={get st(){return st;},update,start,keys,doBlink,doLook,toggleCam,pathAt,ROUTE,setSteer:v=>{touchSteer=v;},
+window.__game={get st(){return st;},update,start,keys,doBlink,doLook,doMirror,toggleCam,pathAt,ROUTE,setSteer:v=>{touchSteer=v;},
   R:{nA,nB,nC,nD,nE,LINE_C,LINE_D,ZEBRA,END0,END1,SC_A,SC_C,SC_CYC,SC_E}};
 requestAnimationFrame(frame);
 })();
