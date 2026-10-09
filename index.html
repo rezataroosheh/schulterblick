@@ -1,14 +1,18 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="بازی سه‌بعدی تمرین آزمون عملی رانندگی آلمان">
+<meta name="description" content="3D practice game for the German practical driving test (class B)">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <title>Fahrprüfung 3D</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="theme-color" content="#00588c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Roboto+Condensed:wght@500;600;700&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: full-bleed 3D stage, examiner strip and rear-view mirror on top, side mirrors left/right, instrument cluster bottom-centre, wheel left, pedals right. */
 :root{
@@ -17,7 +21,10 @@
   --yellow:#f7b500; --on-yellow:#16191d; --red:#c1121c; --blue:#00588c; --green:#008754; --on-accent:#ffffff;
   --de:'Barlow Semi Condensed','DIN Alternate','Arial Narrow',Arial,sans-serif;
   --fa:'Vazirmatn',Tahoma,'Segoe UI',sans-serif;
+  --ui:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;             /* running text */
+  --lbl:'Barlow Semi Condensed','Roboto Condensed','Arial Narrow',Arial,sans-serif;   /* labels; Roboto Condensed covers Cyrillic */
 }
+:root:lang(fa),:root:lang(ar){--ui:var(--fa);--lbl:var(--fa)}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0f1114; --panel:#181b1f; --card:#20242a; --ink:#eef0f2; --muted:#9aa2ab; --line:#333941;
@@ -31,8 +38,8 @@
 *{box-sizing:border-box}
 html{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--fa);overflow:hidden;-webkit-text-size-adjust:100%}
-.de{font-family:var(--de);direction:ltr;unicode-bidi:isolate}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);overflow:hidden;-webkit-text-size-adjust:100%}
+kbd{font:600 12px/1 var(--de);border:1px solid var(--line);border-radius:4px;padding:1px 5px;direction:ltr;unicode-bidi:isolate}
 
 #app{position:relative;height:100%;display:flex;flex-direction:column;background:var(--panel)}
 #stage{position:relative;flex:1;min-height:0;overflow:hidden;background:var(--sky)}
@@ -40,24 +47,23 @@ canvas{display:block;width:100%;height:100%}
 
 #top{position:absolute;top:10px;left:16px;right:16px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;direction:ltr}
 #examiner{width:100%;max-width:620px;display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px 9px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-#examiner .who{flex:none;font:600 12px/1 var(--de);background:var(--blue);color:var(--on-accent);padding:6px 8px;border-radius:7px;margin-top:1px}
+#examiner .who{flex:none;font:600 12px/1 var(--lbl);background:var(--blue);color:var(--on-accent);padding:6px 8px;border-radius:7px;margin-top:1px}
 #examiner .say{flex:1;min-width:0}
 #ex-de{font:600 17.5px/1.2 var(--de);color:var(--ink)}
-#ex-fa{direction:rtl;text-align:right;font-size:12px;line-height:1.5;color:var(--muted);margin-top:2px}
+#ex-tr{text-align:start;font-size:12px;line-height:1.5;color:var(--muted);margin-top:2px}
 #examiner.new{animation:nudge .9s ease-out}
 @keyframes nudge{0%{background:var(--yellow)}100%{background:var(--card)}}
 #chips{width:100%;max-width:620px;display:flex;justify-content:space-between;gap:8px}
-.chip{appearance:none;-webkit-appearance:none;border:0;background:var(--glass);color:var(--on-glass);border-radius:10px;padding:7px 11px;font:500 13px/1.4 var(--fa);pointer-events:auto}
-button.chip{font:600 14px/1.3 var(--de);cursor:pointer;touch-action:manipulation}
+.chip{appearance:none;-webkit-appearance:none;border:0;background:var(--glass);color:var(--on-glass);border-radius:10px;padding:7px 11px;font:500 13px/1.4 var(--ui);pointer-events:auto}
+button.chip{font:600 14px/1.3 var(--lbl);cursor:pointer;touch-action:manipulation}
 button.chip:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
-#count{direction:rtl}
-#score{font:600 14px/1.3 var(--de);font-variant-numeric:tabular-nums}
+#score{font:600 14px/1.3 var(--lbl);font-variant-numeric:tabular-nums}
 #mult{color:var(--yellow);margin-left:4px}
 #count .sev{color:#ff9aa0}
-#toast{width:100%;max-width:620px;direction:rtl;background:var(--yellow);color:var(--on-yellow);border-radius:12px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;transform:translateY(-6px);transition:opacity .2s,transform .2s}
+#toast{width:100%;max-width:620px;background:var(--yellow);color:var(--on-yellow);border-radius:12px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;transform:translateY(-6px);transition:opacity .2s,transform .2s}
 #toast.show{opacity:1;transform:none}
 #toast.good{background:var(--green);color:var(--on-accent)}
-#toast b{display:block;font:700 15px/1.25 var(--de);direction:ltr;text-align:left}
+#toast b{display:block;font:700 15px/1.25 var(--lbl)}
 #toast span{font-size:12.5px;line-height:1.55}
 
 #speedo{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);direction:ltr;display:flex;align-items:center;gap:6px;background:var(--glass);color:var(--on-glass);border-radius:18px;padding:6px 10px}
@@ -84,9 +90,9 @@ button.chip:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
   grid-template-columns:repeat(4,1fr);grid-template-areas:"lookL blL blR lookR" "steer steer brake gas"}
 #lookL{grid-area:lookL} #blL{grid-area:blL} #blR{grid-area:blR} #lookR{grid-area:lookR}
 #steer{grid-area:steer} #brake{grid-area:brake} #gas{grid-area:gas}
-.key{appearance:none;-webkit-appearance:none;min-width:0;border:1px solid var(--line);background:var(--key);color:var(--key-ink);border-radius:12px;height:54px;padding:0 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 13.5px/1.15 var(--de);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.key{appearance:none;-webkit-appearance:none;min-width:0;border:1px solid var(--line);background:var(--key);color:var(--key-ink);border-radius:12px;min-height:54px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font:600 13.5px/1.1 var(--lbl);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 .key svg{width:20px;height:20px;fill:currentColor;flex:none}
-.key small{font:500 10.5px/1.3 var(--fa);color:var(--muted);direction:rtl}
+.key small{font:500 10.5px/1.3 var(--lbl);color:var(--muted)}
 .key:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .key.blink.on{background:var(--yellow);border-color:var(--yellow);color:var(--on-yellow)}
 .key.blink.on.dim{background:color-mix(in srgb,var(--yellow) 45%,var(--key))}
@@ -109,13 +115,13 @@ button.chip:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
   #controls>*{pointer-events:auto}
   .key,#steer{background:color-mix(in srgb,var(--key) 82%,transparent)}
   #gas{background:color-mix(in srgb,var(--ink) 86%,transparent)}
-  .key{height:46px}
+  .key{min-height:46px}
   #brake,#gas,#steer{height:64px}
   .mirror.side{bottom:150px;width:clamp(96px,17vw,200px)}
   #dial{width:74px;height:74px}
 }
 @media (orientation:landscape) and (max-height:460px){
-  #ex-fa{display:none} #ex-de{font-size:16px}
+  #ex-tr{display:none} #ex-de{font-size:16px}
   .key small{display:none}
   .mirror.side{width:110px} #mirC{width:min(30%,200px)}
 }
@@ -124,11 +130,12 @@ button.chip:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .ov.show{display:flex}
 .sheet{width:100%;max-width:440px;max-height:100%;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:6px 6px 18px 18px;border-top:6px solid var(--blue);padding:18px 20px 20px;box-shadow:0 18px 50px rgba(0,0,0,.3)}
 .sheet.bad{border-top-color:var(--red)} .sheet.good{border-top-color:var(--green)}
-.form-head{font:600 14px/1.3 var(--de);direction:ltr;text-align:left;color:var(--muted);padding-bottom:8px;border-bottom:1px dashed var(--line);margin-bottom:14px}
+.form-head{font:600 14px/1.3 var(--lbl);color:var(--muted);padding-bottom:8px;border-bottom:1px dashed var(--line);margin-bottom:14px}
 h1{font-size:24px;line-height:1.35;margin:0 0 8px;font-weight:700;text-wrap:balance}
-h2{font:700 21px/1.25 var(--de);direction:ltr;text-align:left;margin:0 0 6px}
+h2{font:700 21px/1.25 var(--lbl);margin:0 0 6px}
 p{margin:0 0 12px;font-size:14.5px;line-height:1.85}
-ol.rules{list-style:persian;margin:0 0 14px;padding:0 20px 0 0;font-size:14px;line-height:1.85}
+ol.rules{list-style:decimal;margin:0 0 14px;padding:0;padding-inline-start:20px;font-size:14px;line-height:1.85}
+:root:lang(fa) ol.rules{list-style:persian} :root:lang(ar) ol.rules{list-style:arabic-indic}
 ol.rules li{margin-bottom:6px}
 .hint{font-size:12.5px;color:var(--muted);line-height:1.75}
 .keys-hint,.touch-hint{display:none}
@@ -137,42 +144,47 @@ ol.rules li{margin-bottom:6px}
 label.opt{display:flex;align-items:center;gap:8px;font-size:13.5px;margin:4px 0 16px;cursor:pointer}
 label.opt input{width:18px;height:18px;accent-color:var(--blue)}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
-.btn{appearance:none;-webkit-appearance:none;flex:1;min-width:130px;height:50px;border-radius:12px;border:1px solid var(--ink);background:var(--ink);color:var(--card);font:700 15.5px var(--fa);cursor:pointer}
+.btn{appearance:none;-webkit-appearance:none;flex:1;min-width:130px;height:50px;border-radius:12px;border:1px solid var(--ink);background:var(--ink);color:var(--card);font:700 15.5px var(--ui);cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
-.stamp{display:inline-block;direction:ltr;font:700 26px/1 var(--de);letter-spacing:.04em;padding:9px 14px 10px;border:3px solid currentColor;border-radius:8px;transform:rotate(-3deg);margin:6px 0 14px}
+.stamp{display:inline-block;font:700 26px/1 var(--lbl);letter-spacing:.04em;padding:9px 14px 10px;border:3px solid currentColor;border-radius:8px;transform:rotate(-3deg);margin:6px 0 14px}
 .good .stamp{color:var(--green)} .bad .stamp{color:var(--red)}
 .verdict{font-size:15px;font-weight:700;margin-bottom:6px}
 .scoreline{font-size:14px;line-height:1.7;margin-bottom:12px}
 .scoreline .stars{font-size:22px;letter-spacing:2px;color:var(--yellow);direction:ltr;unicode-bidi:isolate;margin-inline-end:8px}
 ul.log{list-style:none;margin:0 0 14px;padding:0;border-top:1px dashed var(--line)}
 ul.log li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.7}
-ul.log b{display:block;font:600 15.5px/1.3 var(--de);direction:ltr;text-align:left}
+ul.log b{display:block;font:600 15.5px/1.3 var(--lbl)}
 ul.log li.sev b{color:var(--red)}
 ul.log li.sev b::before{content:"✕ "}
+.langs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.langs button{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:600 14px/1.2 var(--lbl);cursor:pointer}
+.langs button:lang(fa),.langs button:lang(ar){font-family:var(--fa)}
+.langs button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-accent)}
+.langs button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){#examiner.new{animation:none}#toast{transition:none}}
 </style>
 </head>
 <body>
 
-<div id="app" lang="fa" dir="rtl">
+<div id="app">
   <div id="stage">
-    <canvas id="cv" aria-label="نمای سه‌بعدی از خیابان و ماشین آموزشگاه"></canvas>
+    <canvas id="cv" data-ta="cv"></canvas>
     <div id="top">
-      <div id="examiner" aria-live="polite"><span class="who">Prüfer</span><div class="say"><div id="ex-de"></div><div id="ex-fa"></div></div></div>
+      <div id="examiner" aria-live="polite"><span class="who" data-t="examiner"></span><div class="say"><div id="ex-de" lang="de"></div><div id="ex-tr"></div></div></div>
       <div id="chips">
-        <button class="chip" id="camBtn" type="button">Kamera: innen</button>
-        <div class="chip" id="score">Punkte <b id="pts">0</b><span id="mult"></span></div>
-        <div class="chip" id="count">خطای سبک <b id="minor">۰</b><span id="sevwrap" hidden> | <span class="sev">جدی <b id="severe">۰</b></span></span></div>
+        <button class="chip" id="camBtn" type="button"></button>
+        <div class="chip" id="score"><span data-t="points"></span> <b id="pts">0</b><span id="mult"></span></div>
+        <div class="chip" id="count"><span data-t="minor"></span> <b id="minor">0</b><span id="sevwrap" hidden> | <span class="sev"><span data-t="severe"></span> <b id="severe">0</b></span></span></div>
       </div>
-      <div class="mirror" id="mirC" role="img" aria-label="Innenspiegel"></div>
+      <div class="mirror" id="mirC" role="img" data-ta="mirC"></div>
       <div id="toast" role="status"><b></b><span></span></div>
     </div>
-    <button class="mirror side" id="mirL" type="button" aria-label="Spiegel links"></button>
-    <button class="mirror side" id="mirR" type="button" aria-label="Spiegel rechts"></button>
+    <button class="mirror side" id="mirL" type="button" data-ta="mirL"></button>
+    <button class="mirror side" id="mirR" type="button" data-ta="mirR"></button>
     <div id="speedo">
       <svg class="ind" id="indL" viewBox="0 0 24 24"><path d="M11 4 2 12l9 8v-5h10V9H11z"/></svg>
-      <svg id="dial" viewBox="0 0 100 100" role="img" aria-label="Tachometer">
+      <svg id="dial" viewBox="0 0 100 100" role="img" data-ta="dial">
         <g id="ticks"></g>
         <line id="needle" x1="44" y1="50" x2="88" y2="50"/><circle id="hub" cx="50" cy="50" r="4.5"/>
         <text id="kmh" x="50" y="80">0</text><text class="unit" x="50" y="92">km/h</text>
@@ -182,56 +194,51 @@ ul.log li.sev b::before{content:"✕ "}
   </div>
 
   <div id="controls">
-    <button class="key look" id="lookL" type="button" aria-label="Schulterblick links"><svg viewBox="0 0 24 24"><circle cx="13" cy="8" r="4.5"/><path d="M10 12.5 2 23l9.5-3z" opacity=".55"/></svg><span>Schulterblick</span><small>نگاه چپ</small></button>
-    <button class="key blink" id="blL" type="button" aria-label="Blinker links"><svg viewBox="0 0 24 24"><path d="M11 4 2 12l9 8v-5h10V9H11z"/></svg><span>Blinker</span><small>راهنما چپ</small></button>
-    <button class="key blink" id="blR" type="button" aria-label="Blinker rechts"><svg viewBox="0 0 24 24"><path d="m13 4 9 8-9 8v-5H3V9h10z"/></svg><span>Blinker</span><small>راهنما راست</small></button>
-    <button class="key look" id="lookR" type="button" aria-label="Schulterblick rechts"><svg viewBox="0 0 24 24"><circle cx="11" cy="8" r="4.5"/><path d="M14 12.5 22 23l-9.5-3z" opacity=".55"/></svg><span>Schulterblick</span><small>نگاه راست</small></button>
-    <div id="steer" role="slider" aria-label="Lenkung" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0" tabindex="-1">
+    <button class="key look" id="lookL" type="button" data-ta="look left"><svg viewBox="0 0 24 24"><circle cx="13" cy="8" r="4.5"/><path d="M10 12.5 2 23l9.5-3z" opacity=".55"/></svg><span data-t="look"></span><small data-t="left"></small></button>
+    <button class="key blink" id="blL" type="button" data-ta="blink left"><svg viewBox="0 0 24 24"><path d="M11 4 2 12l9 8v-5h10V9H11z"/></svg><span data-t="blink"></span><small data-t="left"></small></button>
+    <button class="key blink" id="blR" type="button" data-ta="blink right"><svg viewBox="0 0 24 24"><path d="m13 4 9 8-9 8v-5H3V9h10z"/></svg><span data-t="blink"></span><small data-t="right"></small></button>
+    <button class="key look" id="lookR" type="button" data-ta="look right"><svg viewBox="0 0 24 24"><circle cx="11" cy="8" r="4.5"/><path d="M14 12.5 22 23l-9.5-3z" opacity=".55"/></svg><span data-t="look"></span><small data-t="right"></small></button>
+    <div id="steer" role="slider" data-ta="steer" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0" tabindex="-1">
       <div id="knob"><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="13"/><path d="M4 17h9m8 0h9M17 21v9"/><circle cx="17" cy="17" r="4"/></svg></div>
     </div>
-    <button class="key" id="brake" type="button"><span>Bremse</span><small>ترمز</small></button>
-    <button class="key" id="gas" type="button"><span>Gas</span><small>گاز</small></button>
+    <button class="key" id="brake" type="button"><span data-t="brake"></span></button>
+    <button class="key" id="gas" type="button"><span data-t="gas"></span></button>
   </div>
 
   <div class="ov show" id="intro">
     <div class="sheet">
-      <div class="form-head">Praktische Fahrprüfung, Klasse B: Übungsfahrt</div>
-      <h1>تمرین آزمون عملی رانندگی، سه‌بعدی</h1>
-      <p id="introText">ممتحن به آلمانی مسیر می‌دهد. فرمان، گاز و ترمز با شماست و هر خطا مثل امتحان واقعی ثبت می‌شود.</p>
-      <ol class="rules">
-        <li>قبل از راه افتادن، پیچیدن و کنار زدن به این ترتیب: <span class="de">Spiegel</span> (آینهٔ بغل همان سمت)، <span class="de">Blinker</span>، <span class="de">Schulterblick</span>. دوربین واقعاً به عقب می‌چرخد.</li>
-        <li>آینهٔ بغل نقطهٔ کور دارد. دوچرخه‌ای که درست کنار ماشین است فقط با <span class="de">Schulterblick</span> دیده می‌شود.</li>
-        <li>سرعت مجاز را از تابلوها بخوانید. جایی نوشته نمی‌شود.</li>
-        <li>چراغ قرمز، تابلوی ایست، حق تقدم، تصادف و رفتن روی پیاده‌رو خطای جدی‌اند و یعنی مردود.</li>
-        <li>هر مانور بی‌نقص امتیاز دارد و با هر مانور درستِ پشت‌سرهم ضریب بالا می‌رود. یک خطا ضریب را صفر می‌کند.</li>
-      </ol>
-      <p class="hint touch-hint">فرمان: دایرهٔ فرمان را بگیرید و به چپ یا راست بکشید. گاز و ترمز را نگه دارید. برای نگاه در آینه روی آینهٔ بغل بزنید.</p>
-      <p class="hint keys-hint">صفحه‌کلید: ↑ گاز، ↓ ترمز، ← → فرمان، <span class="de">Q</span> و <span class="de">E</span> راهنمای چپ و راست، <span class="de">2</span> و <span class="de">3</span> نگاه در آینهٔ چپ و راست، <span class="de">1</span> و <span class="de">4</span> نگاه از روی شانهٔ چپ و راست، <span class="de">V</span> دوربین. آینه‌ها را با ماوس هم می‌شود زد.</p>
-      <label class="opt" style="margin-bottom:4px"><input type="checkbox" id="sound" checked> صدای موتور، راهنما و امتیاز</label>
-      <label class="opt"><input type="checkbox" id="voice"> ممتحن با صدا حرف بزند (آلمانی)</label>
-      <div class="btns"><button class="btn" id="startBtn" type="button">شروع آزمون</button></div>
+      <div class="langs" id="langs" role="group" data-ta="lang"></div>
+      <div class="form-head" data-t="formIntro"></div>
+      <h1 data-t="title"></h1>
+      <p id="introText"></p>
+      <ol class="rules" id="rules"></ol>
+      <p class="hint touch-hint" data-t="touchHint"></p>
+      <p class="hint keys-hint" data-th="keysHint"></p>
+      <label class="opt" style="margin-bottom:4px"><input type="checkbox" id="sound" checked> <span data-t="sound"></span></label>
+      <label class="opt"><input type="checkbox" id="voice"> <span data-t="voice"></span></label>
+      <div class="btns"><button class="btn" id="startBtn" type="button" data-t="start"></button><button class="btn ghost" id="installBtn" type="button" data-t="install" hidden></button></div>
     </div>
   </div>
 
   <div class="ov" id="fail">
     <div class="sheet bad">
-      <div class="form-head">Erheblicher Fehler: nicht bestanden</div>
-      <h2 id="fail-de"></h2>
-      <p id="fail-fa"></p>
-      <p class="hint">در امتحان واقعی ممتحن همین‌جا ترمز می‌گرفت و آزمون تمام بود. می‌توانید بقیهٔ مسیر را تمرین کنید؛ نتیجه مردود می‌ماند.</p>
-      <div class="btns"><button class="btn" id="contBtn" type="button">ادامهٔ تمرین</button><button class="btn ghost" id="againBtn1" type="button">شروع دوباره</button></div>
+      <div class="form-head" data-t="failHead"></div>
+      <h2 id="fail-title"></h2>
+      <p id="fail-text"></p>
+      <p class="hint" data-t="failHint"></p>
+      <div class="btns"><button class="btn" id="contBtn" type="button" data-t="cont"></button><button class="btn ghost" id="againBtn1" type="button" data-t="again"></button></div>
     </div>
   </div>
 
   <div class="ov" id="result">
     <div class="sheet" id="resSheet">
-      <div class="form-head">Prüfprotokoll, Klasse B</div>
+      <div class="form-head" data-t="resHead"></div>
       <div><span class="stamp" id="stamp"></span></div>
       <div class="verdict" id="verdict"></div>
       <div class="scoreline"><span class="stars" id="stars"></span><span id="scoreline"></span></div>
       <ul class="log" id="log"></ul>
-      <p class="hint">معیار این بازی ساده‌شده است: یک خطای جدی یا چهار خطای سبک یعنی مردود. در امتحان واقعی ممتحن کل رانندگی را با هم می‌سنجد.</p>
-      <div class="btns"><button class="btn" id="againBtn2" type="button">شروع دوباره</button></div>
+      <p class="hint" data-t="resHint"></p>
+      <div class="btns"><button class="btn" id="againBtn2" type="button" data-t="again"></button></div>
     </div>
   </div>
 </div>
@@ -243,8 +250,479 @@ ul.log li.sev b::before{content:"✕ "}
 const $ = id => document.getElementById(id);
 const cv = $('cv'), stage = $('stage');
 const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
-const fa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-function unsupported(){ $('introText').textContent='این بازی به WebGL نیاز دارد و در این مرورگر اجرا نشد. با یک مرورگر به‌روز دوباره امتحان کنید.'; $('startBtn').disabled=true; }
+/* ---------- languages: the examiner always speaks German (as in the real test); everything else follows the chosen language ---------- */
+const SAY_DE = [
+  'Guten Tag. Bitte fahren Sie los und folgen Sie dem Straßenverlauf.',
+  'An der nächsten Kreuzung bitte rechts abbiegen.',
+  'An der Ampel bitte rechts abbiegen.',
+  'An der nächsten Kreuzung bitte links abbiegen.',
+  'Bitte halten Sie rechts am Fahrbahnrand an.',
+  'Vielen Dank, die Prüfungsfahrt ist beendet.',
+];
+const TX = {
+de:{ name:'Deutsch', dir:'ltr',
+  cv:'3D-Ansicht der Straße und des Fahrschulautos', examiner:'Prüfer', camIn:'Kamera: innen', camOut:'Kamera: außen',
+  points:'Punkte', minor:'Leichte Fehler', severe:'schwer', mirC:'Innenspiegel', mirL:'Spiegel links', mirR:'Spiegel rechts', dial:'Tachometer',
+  look:'Schulterblick', blink:'Blinker', left:'links', right:'rechts', brake:'Bremse', gas:'Gas', steer:'Lenkung', lang:'Sprache',
+  formIntro:'Praktische Fahrprüfung, Klasse B: Übungsfahrt', title:'Die praktische Fahrprüfung üben, in 3D',
+  introText:'Der Prüfer gibt die Anweisungen auf Deutsch. Lenkung, Gas und Bremse liegen bei Ihnen, und jeder Fehler wird wie in der echten Prüfung notiert.',
+  rules:[
+    'Vor dem Anfahren, Abbiegen und Anhalten in dieser Reihenfolge: Spiegel (Außenspiegel auf dieser Seite), Blinker, Schulterblick. Die Kamera dreht sich dabei wirklich nach hinten.',
+    'Der Außenspiegel hat einen toten Winkel. Ein Radfahrer direkt neben dem Auto ist nur mit dem Schulterblick zu sehen.',
+    'Die zulässige Geschwindigkeit steht auf den Schildern, nirgends sonst.',
+    'Rote Ampel, Stoppschild, Vorfahrt, Unfall und Fahren auf dem Gehweg sind schwere Fehler und bedeuten: nicht bestanden.',
+    'Jedes fehlerfreie Manöver bringt Punkte, und mit jedem weiteren fehlerfreien Manöver in Folge steigt der Multiplikator. Ein Fehler setzt ihn zurück.'],
+  touchHint:'Lenken: den Lenkknopf festhalten und nach links oder rechts ziehen. Gas und Bremse gedrückt halten. Für den Spiegelblick auf den Außenspiegel tippen.',
+  keysHint:'Tastatur: <kbd>↑</kbd> Gas, <kbd>↓</kbd> Bremse, <kbd>←</kbd> <kbd>→</kbd> lenken, <kbd>Q</kbd> <kbd>E</kbd> Blinker links/rechts, <kbd>2</kbd> <kbd>3</kbd> Spiegel links/rechts, <kbd>1</kbd> <kbd>4</kbd> Schulterblick links/rechts, <kbd>V</kbd> Kamera. Die Spiegel lassen sich auch anklicken.',
+  sound:'Ton für Motor, Blinker und Punkte', voice:'Prüfer spricht laut (Deutsch)', start:'Prüfung starten', install:'Als App installieren',
+  failHead:'Erheblicher Fehler: nicht bestanden',
+  failHint:'In der echten Prüfung würde der Prüfer hier eingreifen und die Prüfung beenden. Sie können den Rest der Strecke weiter üben; das Ergebnis bleibt „nicht bestanden“.',
+  cont:'Weiter üben', again:'Neu starten', resHead:'Prüfprotokoll, Klasse B', pass:'Bestanden', fail:'Nicht bestanden',
+  verdict:(ok,se,mi,t)=>`${ok?'Bestanden':'Nicht bestanden'}: schwere Fehler ${se}, leichte Fehler ${mi}, Zeit ${t}`,
+  score:(s,max,best,rec)=>`${s} von ${max} Punkten`+(rec?', neuer Rekord':best?`, Ihr Bestwert ${best}`:''),
+  none:'Keine Fehler notiert.',
+  resHint:'Vereinfachte Regel in diesem Spiel: ein schwerer oder vier leichte Fehler bedeuten nicht bestanden. In der echten Prüfung bewertet der Prüfer die ganze Fahrt.',
+  unsupported:'Dieses Spiel braucht WebGL und läuft in diesem Browser nicht. Bitte mit einem aktuellen Browser erneut versuchen.',
+  mult:n=>`, Multiplikator ×${n}`,
+  wrong:['Falsch abgebogen','Sie haben die Strecke des Prüfers verlassen. In der echten Prüfung ist das kein Fehler; Sie wurden auf die Strecke zurückgesetzt.'],
+  say:SAY_DE,
+  err:{
+    start_blinker:['Anfahren ohne Blinker','Sie sind ohne linken Blinker losgefahren.'],
+    start_look:['Anfahren ohne Schulterblick','Vor dem Anfahren haben Sie nicht über die linke Schulter geschaut.'],
+    start_traffic:['Fließenden Verkehr beim Anfahren gefährdet','Von hinten kam ein Auto, und Sie sind davor losgefahren. Es muss zuerst vorbei.'],
+    speed:['Zulässige Geschwindigkeit überschritten','Sie sind schneller als erlaubt gefahren.'],
+    speed_severe:['Erhebliche Geschwindigkeitsüberschreitung','Sie waren mehr als 20 km/h zu schnell.'],
+    rvl_fast:['Zu schnell an Rechts-vor-links-Kreuzung','Kreuzung ohne Schilder: so langsam heranfahren, dass Sie für ein Auto von rechts anhalten können.'],
+    rvl_violation:['Rechts vor links missachtet','Kreuzung ohne Schilder: Das Auto von rechts hat Vorfahrt.'],
+    rvl_stop:['Unnötiges Anhalten trotz Vorfahrt','Das Auto kam von links, Sie hatten Vorfahrt. Grundloses Anhalten ist auch ein Fehler.'],
+    stop_sign:['Stoppschild: kein vollständiger Halt','Am Stoppschild muss das Auto ganz stehen, auch wenn die Straße frei ist.'],
+    vorfahrt:['Vorfahrt missachtet','Die Autos auf der Hauptstraße haben Vorfahrt, und die Lücke war zu klein.'],
+    blinker_none:['Abbiegen ohne Blinker','Sie sind ohne Blinker abgebogen.'],
+    blinker_late:['Zu spät geblinkt','Der Blinker kam zu spät. Er muss an sein, bevor Sie langsamer werden.'],
+    look_none:['Abbiegen ohne Schulterblick','Vor dem Abbiegen haben Sie nicht über die Schulter geschaut.'],
+    turn_fast:['Zu schnell abgebogen','Sie sind zu schnell abgebogen.'],
+    zebra:['Fußgänger am Zebrastreifen nicht beachtet','Der Fußgänger wollte über die Straße. Sie hätten vor dem Zebrastreifen halten müssen.'],
+    red:['Rote Ampel überfahren','Sie sind bei Rot gefahren.'],
+    cyclist:['Radfahrer beim Rechtsabbiegen gefährdet','Der Radfahrer rechts neben Ihnen fuhr geradeaus und hatte Vorrang. Mit dem Schulterblick wäre er zu sehen gewesen.'],
+    oncoming:['Gegenverkehr beim Linksabbiegen missachtet','Beim Linksabbiegen hat der Gegenverkehr Vorrang.'],
+    lane:['Rechtsfahrgebot missachtet','Sie haben Ihre Spur verlassen und sind auf die Gegenfahrbahn geraten.'],
+    curb:['Bordstein überfahren','Ein Rad ist über den Bordstein gefahren.'],
+    gehweg:['Auf den Gehweg gefahren','Das Auto ist auf den Gehweg gefahren.'],
+    crash:['Zusammenstoß','Sie hatten einen Unfall.'],
+    end_blinker:['Anhalten ohne Blinker','Sie haben ohne rechten Blinker angehalten.'],
+    end_look:['Anhalten ohne Schulterblick','Vor dem Anhalten haben Sie nicht über die rechte Schulter geschaut.'],
+    end_far:['Zu weit vom Fahrbahnrand gehalten','Zum Anhalten nah an den rechten Bordstein fahren.'],
+    end_missed:['Anweisung nicht befolgt','Sie haben nicht dort angehalten, wo der Prüfer es wollte.'],
+    mirror_none:['Spiegelblick unterlassen','Vor diesem Manöver haben Sie nicht in den Außenspiegel auf dieser Seite geschaut.'],
+    order:['Reihenfolge nicht eingehalten','Richtig ist: zuerst Spiegel, dann Blinker, dann Schulterblick.'] },
+  good:{
+    start:['Sauber angefahren','Beim Anfahren alles richtig gemacht.'], rvlA:['Rechts vor links beachtet','Sie haben das Auto von rechts vorgelassen.'],
+    rvlB:['Vorfahrt richtig genutzt','Ohne unnötiges Anhalten weitergefahren.'], stop:['Stoppschild und Vorfahrt beachtet','Ganz angehalten und richtig in die Hauptstraße eingebogen.'],
+    zebra:['Fußgänger durchgelassen','Sie haben dem Fußgänger Vorrang gegeben.'], light:['Ampel und Radfahrer beachtet','Rote Ampel und Radfahrer richtig beachtet.'],
+    left:['Gegenverkehr durchgelassen','Fehlerfrei links abgebogen.'], end:['Sauber angehalten','Fehlerfrei am Fahrbahnrand angehalten.'] } },
+
+en:{ name:'English', dir:'ltr',
+  cv:'3D view of the street and the driving-school car', examiner:'Examiner', camIn:'Camera: inside', camOut:'Camera: outside',
+  points:'Points', minor:'Minor errors', severe:'serious', mirC:'Rear-view mirror', mirL:'Left mirror', mirR:'Right mirror', dial:'Speedometer',
+  look:'Shoulder check', blink:'Indicator', left:'left', right:'right', brake:'Brake', gas:'Gas', steer:'Steering', lang:'Language',
+  formIntro:'Practical driving test, class B: practice drive', title:'Practise the German practical driving test in 3D',
+  introText:'The examiner gives directions in German. Steering, gas and brake are up to you, and every mistake is recorded as in the real test.',
+  rules:[
+    'Before pulling away, turning and pulling over, in this order: mirror (the side mirror on that side), indicator, shoulder check. The camera really turns to look back.',
+    'The side mirror has a blind spot. A cyclist right next to the car can only be seen with a shoulder check.',
+    'Read the speed limit from the signs. It is not shown anywhere else.',
+    'A red light, a stop sign, right of way, a collision and driving onto the pavement are serious errors and mean failing.',
+    'Every flawless manoeuvre scores points, and each correct manoeuvre in a row raises the multiplier. One mistake resets it.'],
+  touchHint:'Steering: hold the steering knob and drag it left or right. Hold the gas and brake buttons. To check a mirror, tap the side mirror.',
+  keysHint:'Keyboard: <kbd>↑</kbd> gas, <kbd>↓</kbd> brake, <kbd>←</kbd> <kbd>→</kbd> steer, <kbd>Q</kbd> <kbd>E</kbd> left/right indicator, <kbd>2</kbd> <kbd>3</kbd> left/right mirror, <kbd>1</kbd> <kbd>4</kbd> left/right shoulder check, <kbd>V</kbd> camera. You can also click the mirrors.',
+  sound:'Engine, indicator and score sounds', voice:'Examiner speaks aloud (in German)', start:'Start the test', install:'Install as app',
+  failHead:'Serious error: failed',
+  failHint:'In the real test the examiner would brake here and the test would be over. You can keep practising on the rest of the route; the result stays “failed”.',
+  cont:'Keep practising', again:'Start again', resHead:'Test report, class B', pass:'Passed', fail:'Failed',
+  verdict:(ok,se,mi,t)=>`${ok?'Passed':'Failed'}: serious errors ${se}, minor errors ${mi}, time ${t}`,
+  score:(s,max,best,rec)=>`Score ${s} of ${max}`+(rec?', new record':best?`, your best ${best}`:''),
+  none:'No errors recorded.',
+  resHint:'This game uses a simplified rule: one serious error or four minor errors means failing. In the real test the examiner judges the whole drive.',
+  unsupported:'This game needs WebGL and could not run in this browser. Please try again in an up-to-date browser.',
+  mult:n=>`, multiplier ×${n}`,
+  wrong:['Wrong turn','You left the examiner’s route. In the real test this is not an error; you have been put back on the route.'],
+  say:['Hello. Please pull away and follow the road.','At the next junction, please turn right.','At the traffic lights, please turn right.','At the next junction, please turn left.','Please pull over on the right at the side of the road.','Thank you, the test drive is over.'],
+  err:{
+    start_blinker:['Pulled away without indicating','You pulled away without the left indicator.'],
+    start_look:['Pulled away without a shoulder check','You did not look over your left shoulder before pulling away.'],
+    start_traffic:['Endangered traffic when pulling away','A car was coming from behind and you pulled out in front of it. It has to pass first.'],
+    speed:['Speed limit exceeded','You drove faster than allowed.'],
+    speed_severe:['Speed limit exceeded by a wide margin','You drove more than 20 km/h over the limit.'],
+    rvl_fast:['Too fast at a right-before-left junction','Unsigned junction: approach slowly enough to stop for a car coming from the right.'],
+    rvl_violation:['Right-before-left ignored','Unsigned junction: the car coming from the right has priority.'],
+    rvl_stop:['Unnecessary stop despite having priority','The car was coming from the left, so you had priority. Stopping for no reason is also an error.'],
+    stop_sign:['Stop sign: no complete stop','At a stop sign the car must stop completely, even when the road is empty.'],
+    vorfahrt:['Right of way ignored','Cars on the main road have priority, and the gap was too small.'],
+    blinker_none:['Turned without indicating','You turned without using the indicator.'],
+    blinker_late:['Indicated too late','The indicator came too late. It must be on before you slow down.'],
+    look_none:['Turned without a shoulder check','You did not look over your shoulder before turning.'],
+    turn_fast:['Turned too fast','You took the turn too fast.'],
+    zebra:['Pedestrian at the zebra crossing ignored','The pedestrian wanted to cross. You should have stopped before the crossing.'],
+    red:['Ran a red light','You drove through a red light.'],
+    cyclist:['Endangered a cyclist when turning right','The cyclist on your right was going straight on and had priority. A shoulder check would have shown them.'],
+    oncoming:['Oncoming traffic ignored when turning left','When turning left, oncoming traffic has priority.'],
+    lane:['Keep-right rule ignored','You left your lane and moved into the oncoming lane.'],
+    curb:['Drove over the kerb','A wheel went over the kerb.'],
+    gehweg:['Drove onto the pavement','The car went onto the pavement.'],
+    crash:['Collision','You had a collision.'],
+    end_blinker:['Pulled over without indicating','You stopped without the right indicator.'],
+    end_look:['Pulled over without a shoulder check','You did not look over your right shoulder before pulling over.'],
+    end_far:['Stopped too far from the kerb','To pull over, stop close to the kerb on the right.'],
+    end_missed:['Instruction not followed','You did not stop where the examiner asked you to.'],
+    mirror_none:['No mirror check','You did not check the side mirror on that side before this manoeuvre.'],
+    order:['Wrong order','The right order is: mirror first, then indicator, then shoulder check.'] },
+  good:{
+    start:['Clean pull-away','Everything right when pulling away.'], rvlA:['Right-before-left observed','You let the car from the right go first.'],
+    rvlB:['Priority used correctly','You drove on without stopping for no reason.'], stop:['Stop sign and priority observed','A full stop and a correct turn into the main road.'],
+    zebra:['Let the pedestrian cross','You gave way to the pedestrian.'], light:['Traffic light and cyclist observed','You respected the red light and the cyclist.'],
+    left:['Let oncoming traffic pass','A flawless left turn.'], end:['Pulled over cleanly','A flawless stop at the side of the road.'] } },
+
+ar:{ name:'العربية', dir:'rtl',
+  cv:'منظر ثلاثي الأبعاد للشارع وسيارة مدرسة القيادة', examiner:'الممتحن', camIn:'الكاميرا: داخل', camOut:'الكاميرا: خارج',
+  points:'النقاط', minor:'أخطاء بسيطة', severe:'جسيمة', mirC:'المرآة الداخلية', mirL:'المرآة اليسرى', mirR:'المرآة اليمنى', dial:'عداد السرعة',
+  look:'نظرة الكتف', blink:'الإشارة', left:'يسار', right:'يمين', brake:'الفرامل', gas:'البنزين', steer:'المقود', lang:'اللغة',
+  formIntro:'اختبار القيادة العملي، الفئة B: قيادة تدريبية', title:'تدرّب على اختبار القيادة العملي الألماني بتقنية ثلاثية الأبعاد',
+  introText:'يعطي الممتحن التوجيهات باللغة الألمانية. المقود والبنزين والفرامل بيدك، ويُسجَّل كل خطأ كما في الاختبار الحقيقي.',
+  rules:[
+    'قبل الانطلاق والانعطاف والتوقف، بهذا الترتيب: المرآة (المرآة الجانبية في الجهة نفسها)، ثم الإشارة، ثم النظر من فوق الكتف. الكاميرا تلتفت فعلاً إلى الخلف.',
+    'للمرآة الجانبية نقطة عمياء. راكب الدراجة الذي بجانب السيارة مباشرة لا يُرى إلا بالنظر من فوق الكتف.',
+    'اقرأ السرعة المسموح بها من اللافتات، فهي غير مكتوبة في أي مكان آخر.',
+    'الإشارة الحمراء ولافتة قف وحق الأولوية والاصطدام والصعود على الرصيف أخطاء جسيمة تعني الرسوب.',
+    'كل مناورة بلا أخطاء تمنحك نقاطاً، ومع كل مناورة صحيحة متتالية يرتفع المضاعِف. أي خطأ يعيده إلى البداية.'],
+  touchHint:'المقود: أمسك زر المقود واسحبه يميناً أو يساراً. اضغط مطوّلاً على البنزين والفرامل. للنظر في المرآة اضغط على المرآة الجانبية.',
+  keysHint:'لوحة المفاتيح: <kbd>↑</kbd> بنزين، <kbd>↓</kbd> فرامل، <kbd>←</kbd> <kbd>→</kbd> توجيه، <kbd>Q</kbd> و<kbd>E</kbd> الإشارة يساراً ويميناً، <kbd>2</kbd> و<kbd>3</kbd> المرآة اليسرى واليمنى، <kbd>1</kbd> و<kbd>4</kbd> النظر من فوق الكتف الأيسر والأيمن، <kbd>V</kbd> الكاميرا. يمكن أيضاً النقر على المرايا بالفأرة.',
+  sound:'أصوات المحرك والإشارة والنقاط', voice:'الممتحن يتكلم بصوت مسموع (بالألمانية)', start:'ابدأ الاختبار', install:'تثبيت كتطبيق',
+  failHead:'خطأ جسيم: راسب',
+  failHint:'في الاختبار الحقيقي كان الممتحن سيضغط على الفرامل هنا وينتهي الاختبار. يمكنك متابعة التدرب على بقية الطريق، لكن النتيجة تبقى رسوباً.',
+  cont:'متابعة التدريب', again:'ابدأ من جديد', resHead:'محضر الاختبار، الفئة B', pass:'ناجح', fail:'راسب',
+  verdict:(ok,se,mi,t)=>`${ok?'ناجح':'راسب'}: أخطاء جسيمة ${se}، أخطاء بسيطة ${mi}، الوقت ${t}`,
+  score:(s,max,best,rec)=>`النقاط ${s} من ${max}`+(rec?'، رقم قياسي جديد':best?`، أفضل نتيجة لك ${best}`:''),
+  none:'لم يُسجَّل أي خطأ.',
+  resHint:'قاعدة اللعبة مبسّطة: خطأ جسيم واحد أو أربعة أخطاء بسيطة تعني الرسوب. في الاختبار الحقيقي يقيّم الممتحن القيادة كلها.',
+  unsupported:'تحتاج هذه اللعبة إلى WebGL ولم تعمل في هذا المتصفح. جرّب مرة أخرى بمتصفح حديث.',
+  mult:n=>`، المضاعِف ×${n}`,
+  wrong:['انعطاف خاطئ','خرجت عن طريق الممتحن. هذا ليس خطأ في الاختبار الحقيقي؛ أُعدت إلى الطريق.'],
+  say:['مرحباً. انطلق من فضلك واتبع مسار الطريق.','عند التقاطع القادم انعطف يميناً من فضلك.','عند الإشارة الضوئية انعطف يميناً من فضلك.','عند التقاطع القادم انعطف يساراً من فضلك.','توقف من فضلك على الجانب الأيمن من الطريق.','شكراً لك، انتهت رحلة الاختبار.'],
+  err:{
+    start_blinker:['الانطلاق دون إشارة','انطلقت دون تشغيل الإشارة اليسرى.'],
+    start_look:['الانطلاق دون النظر من فوق الكتف','لم تنظر من فوق كتفك الأيسر قبل الانطلاق.'],
+    start_traffic:['تعريض حركة السير للخطر عند الانطلاق','كانت سيارة قادمة من الخلف وانطلقت أمامها. يجب أن تتركها تمر أولاً.'],
+    speed:['تجاوز السرعة المسموح بها','قدت أسرع من المسموح.'],
+    speed_severe:['تجاوز كبير للسرعة','تجاوزت السرعة المسموح بها بأكثر من 20 كم/س.'],
+    rvl_fast:['سرعة زائدة عند تقاطع «اليمين أولاً»','تقاطع بلا لافتات: اقترب ببطء يكفي للتوقف لسيارة قادمة من اليمين.'],
+    rvl_violation:['تجاهل قاعدة اليمين أولاً','تقاطع بلا لافتات: السيارة القادمة من اليمين لها الأولوية.'],
+    rvl_stop:['توقف غير ضروري رغم الأولوية','كانت السيارة قادمة من اليسار والأولوية لك. التوقف بلا سبب خطأ أيضاً.'],
+    stop_sign:['لافتة قف: لم تتوقف تماماً','عند لافتة قف يجب أن تتوقف السيارة تماماً حتى لو كان الشارع فارغاً.'],
+    vorfahrt:['تجاهل حق الأولوية','السيارات في الشارع الرئيسي لها الأولوية، والمسافة لم تكن كافية.'],
+    blinker_none:['الانعطاف دون إشارة','انعطفت دون استخدام الإشارة.'],
+    blinker_late:['إشارة متأخرة','شغّلت الإشارة متأخراً. يجب أن تعمل قبل أن تخفف السرعة.'],
+    look_none:['الانعطاف دون النظر من فوق الكتف','لم تنظر من فوق كتفك قبل الانعطاف.'],
+    turn_fast:['انعطاف بسرعة زائدة','كانت سرعتك في الانعطاف عالية.'],
+    zebra:['تجاهل أحد المشاة عند ممر المشاة','أراد أحد المشاة العبور. كان يجب أن تتوقف قبل الممر.'],
+    red:['تجاوز الإشارة الحمراء','عبرت والإشارة حمراء.'],
+    cyclist:['تعريض راكب دراجة للخطر عند الانعطاف يميناً','راكب الدراجة على يمينك كان يسير مستقيماً وله الأولوية. كنت ستراه لو نظرت من فوق كتفك.'],
+    oncoming:['تجاهل السير المقابل عند الانعطاف يساراً','عند الانعطاف يساراً تكون الأولوية للسيارات القادمة من الأمام.'],
+    lane:['عدم الالتزام بالسير على اليمين','خرجت من مسارك ودخلت مسار الاتجاه المعاكس.'],
+    curb:['الصعود على حافة الرصيف','صعدت إحدى العجلات على حافة الرصيف.'],
+    gehweg:['القيادة على الرصيف','دخلت السيارة إلى الرصيف.'],
+    crash:['اصطدام','حدث اصطدام.'],
+    end_blinker:['التوقف دون إشارة','توقفت دون تشغيل الإشارة اليمنى.'],
+    end_look:['التوقف دون النظر من فوق الكتف','لم تنظر من فوق كتفك الأيمن قبل التوقف.'],
+    end_far:['التوقف بعيداً عن حافة الطريق','عند التوقف اقترب من حافة الرصيف على اليمين.'],
+    end_missed:['عدم اتباع التعليمات','لم تتوقف في المكان الذي طلبه الممتحن.'],
+    mirror_none:['عدم النظر في المرآة','لم تنظر في المرآة الجانبية في الجهة نفسها قبل هذه المناورة.'],
+    order:['ترتيب خاطئ','الترتيب الصحيح: المرآة أولاً، ثم الإشارة، ثم النظر من فوق الكتف.'] },
+  good:{
+    start:['انطلاق سليم','قمت بكل شيء بشكل صحيح عند الانطلاق.'], rvlA:['احترمت قاعدة اليمين أولاً','تركت السيارة القادمة من اليمين تمر.'],
+    rvlB:['استخدمت الأولوية بشكل صحيح','واصلت دون توقف غير ضروري.'], stop:['احترمت لافتة قف والأولوية','توقفت تماماً ودخلت الشارع الرئيسي بشكل صحيح.'],
+    zebra:['تركت المشاة يعبرون','أعطيت الأولوية للمشاة.'], light:['احترمت الإشارة وراكب الدراجة','احترمت الإشارة الحمراء وراكب الدراجة.'],
+    left:['تركت السير المقابل يمر','انعطاف يساراً دون أخطاء.'], end:['توقف سليم','توقفت عند حافة الطريق دون أخطاء.'] } },
+
+tr:{ name:'Türkçe', dir:'ltr',
+  cv:'Sokağın ve sürücü kursu aracının 3B görünümü', examiner:'Sınav görevlisi', camIn:'Kamera: iç', camOut:'Kamera: dış',
+  points:'Puan', minor:'Hafif hata', severe:'ağır', mirC:'İç ayna', mirL:'Sol ayna', mirR:'Sağ ayna', dial:'Hız göstergesi',
+  look:'Omuz kontrolü', blink:'Sinyal', left:'sol', right:'sağ', brake:'Fren', gas:'Gaz', steer:'Direksiyon', lang:'Dil',
+  formIntro:'Uygulamalı sürüş sınavı, B sınıfı: alıştırma sürüşü', title:'Alman uygulamalı sürüş sınavına 3B hazırlık',
+  introText:'Sınav görevlisi yönergeleri Almanca verir. Direksiyon, gaz ve fren sizde; her hata gerçek sınavdaki gibi kaydedilir.',
+  rules:[
+    'Kalkıştan, dönüşten ve kenara çekmeden önce bu sırayla: ayna (o taraftaki yan ayna), sinyal, omuz kontrolü. Kamera gerçekten arkaya döner.',
+    'Yan aynanın kör noktası vardır. Aracın hemen yanındaki bisikletli yalnızca omuz kontrolüyle görülür.',
+    'Hız sınırını tabelalardan okuyun; başka hiçbir yerde yazmaz.',
+    'Kırmızı ışık, dur levhası, geçiş üstünlüğü, çarpışma ve kaldırıma çıkmak ağır hatadır ve sınavdan kalmak demektir.',
+    'Her hatasız manevra puan kazandırır; art arda yapılan her doğru manevrayla çarpan yükselir. Tek bir hata çarpanı sıfırlar.'],
+  touchHint:'Direksiyon: direksiyon düğmesini tutup sola ya da sağa çekin. Gaz ve frene basılı tutun. Aynaya bakmak için yan aynaya dokunun.',
+  keysHint:'Klavye: <kbd>↑</kbd> gaz, <kbd>↓</kbd> fren, <kbd>←</kbd> <kbd>→</kbd> direksiyon, <kbd>Q</kbd> <kbd>E</kbd> sol/sağ sinyal, <kbd>2</kbd> <kbd>3</kbd> sol/sağ ayna, <kbd>1</kbd> <kbd>4</kbd> sol/sağ omuz kontrolü, <kbd>V</kbd> kamera. Aynalara fareyle de tıklanabilir.',
+  sound:'Motor, sinyal ve puan sesleri', voice:'Sınav görevlisi sesli konuşsun (Almanca)', start:'Sınava başla', install:'Uygulama olarak yükle',
+  failHead:'Ağır hata: kaldınız',
+  failHint:'Gerçek sınavda görevli burada frene basar ve sınav biterdi. Yolun geri kalanında alıştırmaya devam edebilirsiniz; sonuç “kaldı” olarak kalır.',
+  cont:'Alıştırmaya devam', again:'Yeniden başla', resHead:'Sınav tutanağı, B sınıfı', pass:'Geçti', fail:'Kaldı',
+  verdict:(ok,se,mi,t)=>`${ok?'Geçti':'Kaldı'}: ağır hata ${se}, hafif hata ${mi}, süre ${t}`,
+  score:(s,max,best,rec)=>`Puan ${s} / ${max}`+(rec?', yeni rekor':best?`, en iyi puanınız ${best}`:''),
+  none:'Hiç hata kaydedilmedi.',
+  resHint:'Bu oyunda kural basitleştirilmiştir: bir ağır ya da dört hafif hata kalmak demektir. Gerçek sınavda görevli sürüşün tamamını değerlendirir.',
+  unsupported:'Bu oyun WebGL gerektirir ve bu tarayıcıda çalışmadı. Güncel bir tarayıcıyla yeniden deneyin.',
+  mult:n=>`, çarpan ×${n}`,
+  wrong:['Yanlış dönüş','Sınav görevlisinin güzergâhından çıktınız. Gerçek sınavda bu bir hata değildir; güzergâha geri alındınız.'],
+  say:['İyi günler. Lütfen hareket edin ve yolu takip edin.','Bir sonraki kavşaktan lütfen sağa dönün.','Trafik ışıklarından lütfen sağa dönün.','Bir sonraki kavşaktan lütfen sola dönün.','Lütfen sağda, yol kenarında durun.','Teşekkürler, sınav sürüşü bitti.'],
+  err:{
+    start_blinker:['Sinyal vermeden kalkış','Sol sinyali vermeden hareket ettiniz.'],
+    start_look:['Omuz kontrolü yapmadan kalkış','Kalkmadan önce sol omzunuzun üzerinden bakmadınız.'],
+    start_traffic:['Kalkışta trafiği tehlikeye attınız','Arkadan bir araç geliyordu ve onun önüne çıktınız. Önce geçmesini beklemelisiniz.'],
+    speed:['Hız sınırı aşıldı','İzin verilenden hızlı gittiniz.'],
+    speed_severe:['Hız sınırı büyük ölçüde aşıldı','Hız sınırını 20 km/s’ten fazla aştınız.'],
+    rvl_fast:['Sağdan gelene yol ver kavşağında fazla hız','İşaretsiz kavşak: sağdan gelen araç için durabilecek kadar yavaş yaklaşın.'],
+    rvl_violation:['Sağdan gelene yol verilmedi','İşaretsiz kavşak: sağdan gelen aracın geçiş üstünlüğü vardır.'],
+    rvl_stop:['Geçiş üstünlüğüne rağmen gereksiz duruş','Araç soldan geliyordu, geçiş üstünlüğü sizdeydi. Sebepsiz durmak da hatadır.'],
+    stop_sign:['Dur levhası: tam duruş yok','Dur levhasında yol boş olsa bile araç tamamen durmalıdır.'],
+    vorfahrt:['Geçiş üstünlüğüne uyulmadı','Ana yoldaki araçların geçiş üstünlüğü vardı ve aralık yeterli değildi.'],
+    blinker_none:['Sinyal vermeden dönüş','Sinyal vermeden döndünüz.'],
+    blinker_late:['Geç sinyal','Sinyali geç verdiniz. Yavaşlamadan önce açık olmalı.'],
+    look_none:['Omuz kontrolü yapmadan dönüş','Dönmeden önce omzunuzun üzerinden bakmadınız.'],
+    turn_fast:['Çok hızlı dönüş','Dönüş hızınız yüksekti.'],
+    zebra:['Yaya geçidindeki yayaya yol verilmedi','Yaya karşıya geçmek istiyordu. Geçitten önce durmalıydınız.'],
+    red:['Kırmızı ışıkta geçiş','Kırmızı ışıkta geçtiniz.'],
+    cyclist:['Sağa dönüşte bisikletli tehlikeye atıldı','Sağınızdaki bisikletli düz gidiyordu ve geçiş hakkı onundu. Omuz kontrolüyle görülebilirdi.'],
+    oncoming:['Sola dönüşte karşıdan gelene yol verilmedi','Sola dönerken karşıdan gelen araçların geçiş üstünlüğü vardır.'],
+    lane:['Sağdan gitme kuralına uyulmadı','Şeridinizden çıkıp karşı şeride geçtiniz.'],
+    curb:['Bordüre çıkıldı','Bir tekerlek bordüre çıktı.'],
+    gehweg:['Kaldırıma çıkıldı','Araç kaldırıma çıktı.'],
+    crash:['Çarpışma','Kaza yaptınız.'],
+    end_blinker:['Sinyal vermeden durma','Sağ sinyali vermeden durdunuz.'],
+    end_look:['Omuz kontrolü yapmadan durma','Kenara çekmeden önce sağ omzunuzun üzerinden bakmadınız.'],
+    end_far:['Yol kenarından çok uzakta durma','Dururken sağdaki bordüre yaklaşın.'],
+    end_missed:['Talimata uyulmadı','Sınav görevlisinin istediği yerde durmadınız.'],
+    mirror_none:['Ayna kontrolü yapılmadı','Bu manevradan önce o taraftaki yan aynaya bakmadınız.'],
+    order:['Yanlış sıra','Doğru sıra: önce ayna, sonra sinyal, sonra omuz kontrolü.'] },
+  good:{
+    start:['Temiz kalkış','Kalkışta her şeyi doğru yaptınız.'], rvlA:['Sağdan gelene yol verildi','Sağdan gelen araca yol verdiniz.'],
+    rvlB:['Geçiş üstünlüğü doğru kullanıldı','Gereksiz yere durmadan devam ettiniz.'], stop:['Dur levhasına ve geçiş üstünlüğüne uyuldu','Tam durdunuz ve ana yola doğru girdiniz.'],
+    zebra:['Yayaya yol verildi','Yayaya geçiş hakkı tanıdınız.'], light:['Işığa ve bisikletliye dikkat edildi','Kırmızı ışığa ve bisikletliye uydunuz.'],
+    left:['Karşıdan gelene yol verildi','Hatasız sola dönüş.'], end:['Temiz duruş','Yol kenarında hatasız durdunuz.'] } },
+
+fa:{ name:'فارسی', dir:'rtl',
+  cv:'نمای سه‌بعدی از خیابان و ماشین آموزشگاه', examiner:'ممتحن', camIn:'دوربین: داخل', camOut:'دوربین: بیرون',
+  points:'امتیاز', minor:'خطای سبک', severe:'جدی', mirC:'آینهٔ وسط', mirL:'آینهٔ چپ', mirR:'آینهٔ راست', dial:'سرعت‌سنج',
+  look:'نگاه از شانه', blink:'راهنما', left:'چپ', right:'راست', brake:'ترمز', gas:'گاز', steer:'فرمان', lang:'زبان',
+  formIntro:'آزمون عملی رانندگی، کلاس B: رانندگی تمرینی', title:'تمرین آزمون عملی رانندگی آلمان، سه‌بعدی',
+  introText:'ممتحن به آلمانی مسیر می‌دهد. فرمان، گاز و ترمز با شماست و هر خطا مثل امتحان واقعی ثبت می‌شود.',
+  rules:[
+    'قبل از راه افتادن، پیچیدن و کنار زدن به این ترتیب: آینه (آینهٔ بغل همان سمت)، راهنما، نگاه از روی شانه. دوربین واقعاً به عقب می‌چرخد.',
+    'آینهٔ بغل نقطهٔ کور دارد. دوچرخه‌سواری که درست کنار ماشین است فقط با نگاه از روی شانه دیده می‌شود.',
+    'سرعت مجاز را از تابلوها بخوانید. جای دیگری نوشته نمی‌شود.',
+    'چراغ قرمز، تابلوی ایست، حق تقدم، تصادف و رفتن روی پیاده‌رو خطای جدی‌اند و یعنی مردود.',
+    'هر مانور بی‌نقص امتیاز دارد و با هر مانور درستِ پشت‌سرهم ضریب بالا می‌رود. یک خطا ضریب را صفر می‌کند.'],
+  touchHint:'فرمان: دکمهٔ فرمان را بگیرید و به چپ یا راست بکشید. گاز و ترمز را نگه دارید. برای نگاه در آینه روی آینهٔ بغل بزنید.',
+  keysHint:'صفحه‌کلید: <kbd>↑</kbd> گاز، <kbd>↓</kbd> ترمز، <kbd>←</kbd> <kbd>→</kbd> فرمان، <kbd>Q</kbd> و <kbd>E</kbd> راهنمای چپ و راست، <kbd>2</kbd> و <kbd>3</kbd> آینهٔ چپ و راست، <kbd>1</kbd> و <kbd>4</kbd> نگاه از روی شانهٔ چپ و راست، <kbd>V</kbd> دوربین. آینه‌ها را با ماوس هم می‌شود زد.',
+  sound:'صدای موتور، راهنما و امتیاز', voice:'ممتحن با صدا حرف بزند (آلمانی)', start:'شروع آزمون', install:'نصب به‌عنوان برنامه',
+  failHead:'خطای جدی: مردود',
+  failHint:'در امتحان واقعی ممتحن همین‌جا ترمز می‌گرفت و آزمون تمام بود. می‌توانید بقیهٔ مسیر را تمرین کنید؛ نتیجه مردود می‌ماند.',
+  cont:'ادامهٔ تمرین', again:'شروع دوباره', resHead:'برگهٔ نتیجهٔ آزمون، کلاس B', pass:'قبول', fail:'مردود',
+  verdict:(ok,se,mi,t)=>`${ok?'قبول':'مردود'}: ${se} خطای جدی، ${mi} خطای سبک، زمان ${t}`,
+  score:(s,max,best,rec)=>`امتیاز ${s} از ${max}`+(rec?'، رکورد تازه':best?`، بهترین شما ${best}`:''),
+  none:'هیچ خطایی ثبت نشد.',
+  resHint:'معیار این بازی ساده‌شده است: یک خطای جدی یا چهار خطای سبک یعنی مردود. در امتحان واقعی ممتحن کل رانندگی را با هم می‌سنجد.',
+  unsupported:'این بازی به WebGL نیاز دارد و در این مرورگر اجرا نشد. با یک مرورگر به‌روز دوباره امتحان کنید.',
+  mult:n=>`، ضریب ×${n}`,
+  wrong:['مسیر اشتباه','از مسیر ممتحن خارج شدید. در امتحان واقعی این خطا نیست؛ به مسیر برگشتید.'],
+  say:['روز بخیر. لطفاً حرکت کنید و همین خیابان را مستقیم بروید.','در تقاطع بعدی لطفاً به راست بپیچید.','سر چراغ راهنمایی لطفاً به راست بپیچید.','در تقاطع بعدی لطفاً به چپ بپیچید.','لطفاً سمت راست، کنار خیابان توقف کنید.','متشکرم، آزمون تمام شد.'],
+  err:{
+    start_blinker:['راه افتادن بدون راهنما','بدون راهنمای چپ راه افتادید.'],
+    start_look:['راه افتادن بدون نگاه از روی شانه','قبل از راه افتادن از روی شانهٔ چپ نگاه نکردید.'],
+    start_traffic:['خطر برای ماشین‌های در حال حرکت هنگام راه افتادن','ماشینی از پشت می‌آمد و شما جلویش راه افتادید. اول باید رد شود.'],
+    speed:['سرعت غیرمجاز','از سرعت مجاز بیشتر رفتید.'],
+    speed_severe:['سرعت بسیار بیشتر از حد مجاز','بیش از ۲۰ کیلومتر بالاتر از سرعت مجاز رفتید.'],
+    rvl_fast:['سرعت زیاد در تقاطع «حق تقدم با راست»','تقاطع بدون تابلو: باید آن‌قدر آهسته برسید که بتوانید برای ماشین سمت راست بایستید.'],
+    rvl_violation:['رعایت نکردن حق تقدم سمت راست','تقاطع بدون تابلو: ماشینی که از راست می‌آید حق تقدم دارد.'],
+    rvl_stop:['توقف بی‌دلیل با وجود حق تقدم','ماشین از چپ می‌آمد و حق تقدم با شما بود. توقف بی‌دلیل هم خطاست.'],
+    stop_sign:['تابلوی ایست: توقف کامل نبود','جلوی تابلوی ایست ماشین باید کاملاً بایستد، حتی اگر خیابان خالی باشد.'],
+    vorfahrt:['رعایت نکردن حق تقدم','ماشین‌های خیابان اصلی حق تقدم دارند و فاصله کافی نبود.'],
+    blinker_none:['پیچیدن بدون راهنما','بدون راهنما پیچیدید.'],
+    blinker_late:['راهنمای دیرهنگام','راهنما را دیر زدید. باید پیش از کم کردن سرعت روشن باشد.'],
+    look_none:['پیچیدن بدون نگاه از روی شانه','قبل از پیچیدن از روی شانه نگاه نکردید.'],
+    turn_fast:['پیچیدن با سرعت زیاد','سرعت پیچیدن زیاد بود.'],
+    zebra:['بی‌توجهی به عابر روی خط‌کشی عابر پیاده','عابر می‌خواست رد شود. باید پیش از خط‌کشی می‌ایستادید.'],
+    red:['رد شدن از چراغ قرمز','از چراغ قرمز رد شدید.'],
+    cyclist:['خطر برای دوچرخه‌سوار هنگام گردش به راست','دوچرخه‌سوار سمت راست شما مستقیم می‌رفت و حق تقدم با او بود. با نگاه از روی شانه دیده می‌شد.'],
+    oncoming:['بی‌توجهی به ماشین روبه‌رو هنگام گردش به چپ','موقع پیچیدن به چپ، ماشین روبه‌رو حق تقدم دارد.'],
+    lane:['رعایت نکردن قانون راست‌روی','از خط خودتان بیرون رفتید و وارد مسیر روبه‌رو شدید.'],
+    curb:['رفتن روی جدول','چرخ روی جدول رفت.'],
+    gehweg:['رفتن روی پیاده‌رو','ماشین وارد پیاده‌رو شد.'],
+    crash:['تصادف','تصادف کردید.'],
+    end_blinker:['توقف بدون راهنما','بدون راهنمای راست توقف کردید.'],
+    end_look:['توقف بدون نگاه از روی شانه','قبل از کنار زدن از روی شانهٔ راست نگاه نکردید.'],
+    end_far:['توقف دور از لبهٔ خیابان','برای توقف باید نزدیک جدول سمت راست بایستید.'],
+    end_missed:['اجرا نکردن دستور ممتحن','در جایی که ممتحن خواست توقف نکردید.'],
+    mirror_none:['نگاه نکردن در آینه','پیش از این مانور در آینهٔ بغلِ همان سمت نگاه نکردید.'],
+    order:['ترتیب نادرست','ترتیب درست: اول آینه، بعد راهنما، بعد نگاه از روی شانه.'] },
+  good:{
+    start:['راه افتادن بی‌نقص','موقع راه افتادن همه چیز درست بود.'], rvlA:['حق تقدم سمت راست رعایت شد','به ماشین سمت راست راه دادید.'],
+    rvlB:['استفادهٔ درست از حق تقدم','بدون توقف بی‌دلیل رد شدید.'], stop:['ایست و حق تقدم رعایت شد','کاملاً ایستادید و درست وارد خیابان اصلی شدید.'],
+    zebra:['به عابر راه دادید','حق تقدم عابر پیاده را رعایت کردید.'], light:['چراغ و دوچرخه‌سوار رعایت شد','چراغ قرمز و دوچرخه‌سوار را رعایت کردید.'],
+    left:['گردش به چپ بی‌نقص','به ماشین‌های روبه‌رو راه دادید.'], end:['توقف بی‌نقص','بی‌نقص کنار خیابان توقف کردید.'] } },
+
+uk:{ name:'Українська', dir:'ltr',
+  cv:'Тривимірний вигляд вулиці та автомобіля автошколи', examiner:'Екзаменатор', camIn:'Камера: всередині', camOut:'Камера: ззовні',
+  points:'Бали', minor:'Легкі помилки', severe:'грубі', mirC:'Салонне дзеркало', mirL:'Ліве дзеркало', mirR:'Праве дзеркало', dial:'Спідометр',
+  look:'Через плече', blink:'Поворотник', left:'ліворуч', right:'праворуч', brake:'Гальмо', gas:'Газ', steer:'Кермо', lang:'Мова',
+  formIntro:'Практичний іспит з водіння, категорія B: тренувальна поїздка', title:'Тренування німецького практичного іспиту з водіння у 3D',
+  introText:'Екзаменатор дає вказівки німецькою. Кермо, газ і гальмо — у ваших руках, і кожна помилка фіксується, як на справжньому іспиті.',
+  rules:[
+    'Перед рушанням, поворотом і зупинкою в такому порядку: дзеркало (бокове дзеркало з того ж боку), покажчик повороту, погляд через плече. Камера справді повертається назад.',
+    'Бокове дзеркало має сліпу зону. Велосипедиста просто поруч з автомобілем видно лише поглядом через плече.',
+    'Дозволену швидкість читайте на знаках — більше ніде її не написано.',
+    'Червоне світло, знак «Стоп», перевага в русі, зіткнення та виїзд на тротуар — грубі помилки, що означають провал іспиту.',
+    'Кожен маневр без помилок приносить бали, а з кожним правильним маневром поспіль зростає множник. Одна помилка обнуляє його.'],
+  touchHint:'Кермо: утримуйте кнопку керма й тягніть ліворуч або праворуч. Утримуйте газ і гальмо. Щоб глянути в дзеркало, торкніться бокового дзеркала.',
+  keysHint:'Клавіатура: <kbd>↑</kbd> газ, <kbd>↓</kbd> гальмо, <kbd>←</kbd> <kbd>→</kbd> кермо, <kbd>Q</kbd> <kbd>E</kbd> поворотник ліворуч/праворуч, <kbd>2</kbd> <kbd>3</kbd> ліве/праве дзеркало, <kbd>1</kbd> <kbd>4</kbd> погляд через ліве/праве плече, <kbd>V</kbd> камера. На дзеркала можна також клацнути мишею.',
+  sound:'Звуки двигуна, поворотника й балів', voice:'Екзаменатор говорить уголос (німецькою)', start:'Почати іспит', install:'Встановити як застосунок',
+  failHead:'Груба помилка: не склав',
+  failHint:'На справжньому іспиті екзаменатор тут натиснув би на гальмо, і іспит закінчився б. Можна далі тренуватися на решті маршруту; результат лишається «не склав».',
+  cont:'Тренуватися далі', again:'Почати знову', resHead:'Протокол іспиту, категорія B', pass:'Склав', fail:'Не склав',
+  verdict:(ok,se,mi,t)=>`${ok?'Склав':'Не склав'}: грубих помилок ${se}, легких помилок ${mi}, час ${t}`,
+  score:(s,max,best,rec)=>`Бали: ${s} з ${max}`+(rec?', новий рекорд':best?`, ваш найкращий результат ${best}`:''),
+  none:'Жодної помилки не зафіксовано.',
+  resHint:'Правило в цій грі спрощене: одна груба або чотири легкі помилки означають провал. На справжньому іспиті екзаменатор оцінює всю поїздку загалом.',
+  unsupported:'Для цієї гри потрібен WebGL, і в цьому браузері вона не запустилася. Спробуйте в сучасному браузері.',
+  mult:n=>`, множник ×${n}`,
+  wrong:['Не той поворот','Ви з’їхали з маршруту екзаменатора. На справжньому іспиті це не помилка; вас повернуто на маршрут.'],
+  say:['Добрий день. Будь ласка, рушайте й їдьте вздовж дороги.','На наступному перехресті, будь ласка, поверніть праворуч.','На світлофорі, будь ласка, поверніть праворуч.','На наступному перехресті, будь ласка, поверніть ліворуч.','Будь ласка, зупиніться праворуч біля краю дороги.','Дякую, екзаменаційну поїздку завершено.'],
+  err:{
+    start_blinker:['Рушання без поворотника','Ви рушили без лівого покажчика повороту.'],
+    start_look:['Рушання без погляду через плече','Перед рушанням ви не подивилися через ліве плече.'],
+    start_traffic:['Небезпека для транспорту під час рушання','Ззаду їхало авто, а ви рушили перед ним. Спершу треба його пропустити.'],
+    speed:['Перевищення дозволеної швидкості','Ви їхали швидше, ніж дозволено.'],
+    speed_severe:['Значне перевищення швидкості','Ви перевищили дозволену швидкість більш ніж на 20 км/год.'],
+    rvl_fast:['Завелика швидкість на рівнозначному перехресті','Перехрестя без знаків: під’їжджайте так повільно, щоб могти зупинитися перед авто справа.'],
+    rvl_violation:['Порушено правило «перешкода справа»','Перехрестя без знаків: авто, що їде справа, має перевагу.'],
+    rvl_stop:['Зайва зупинка, хоча перевага була ваша','Авто їхало зліва, перевага була за вами. Безпричинна зупинка — теж помилка.'],
+    stop_sign:['Знак «Стоп»: не було повної зупинки','Перед знаком «Стоп» авто має повністю зупинитися, навіть якщо дорога вільна.'],
+    vorfahrt:['Не надано перевагу в русі','Авто на головній дорозі мають перевагу, а проміжок був замалий.'],
+    blinker_none:['Поворот без поворотника','Ви повернули без покажчика повороту.'],
+    blinker_late:['Запізнілий поворотник','Ви ввімкнули покажчик запізно. Він має горіти ще до того, як ви почнете гальмувати.'],
+    look_none:['Поворот без погляду через плече','Перед поворотом ви не подивилися через плече.'],
+    turn_fast:['Надто швидкий поворот','Ви повертали надто швидко.'],
+    zebra:['Не пропущено пішохода на «зебрі»','Пішохід хотів перейти дорогу. Треба було зупинитися перед переходом.'],
+    red:['Проїзд на червоне світло','Ви проїхали на червоне світло.'],
+    cyclist:['Небезпека для велосипедиста під час повороту праворуч','Велосипедист праворуч від вас їхав прямо й мав перевагу. Погляд через плече показав би його.'],
+    oncoming:['Не пропущено зустрічний транспорт під час повороту ліворуч','Під час повороту ліворуч зустрічний транспорт має перевагу.'],
+    lane:['Порушено правило правостороннього руху','Ви виїхали зі своєї смуги на зустрічну.'],
+    curb:['Наїзд на бордюр','Колесо заїхало на бордюр.'],
+    gehweg:['Виїзд на тротуар','Автомобіль виїхав на тротуар.'],
+    crash:['Зіткнення','Ви потрапили в аварію.'],
+    end_blinker:['Зупинка без поворотника','Ви зупинилися без правого покажчика повороту.'],
+    end_look:['Зупинка без погляду через плече','Перед зупинкою ви не подивилися через праве плече.'],
+    end_far:['Зупинка надто далеко від краю дороги','Зупиняйтеся близько до правого бордюру.'],
+    end_missed:['Вказівку не виконано','Ви не зупинилися там, де просив екзаменатор.'],
+    mirror_none:['Не подивилися в дзеркало','Перед цим маневром ви не подивилися в бокове дзеркало з того ж боку.'],
+    order:['Неправильний порядок','Правильно: спершу дзеркало, потім поворотник, потім погляд через плече.'] },
+  good:{
+    start:['Чисте рушання','Під час рушання все зроблено правильно.'], rvlA:['Правило «перешкода справа» дотримано','Ви пропустили авто справа.'],
+    rvlB:['Перевагу використано правильно','Ви проїхали без зайвої зупинки.'], stop:['Знак «Стоп» і перевагу дотримано','Повна зупинка й правильний виїзд на головну дорогу.'],
+    zebra:['Пішохода пропущено','Ви дали дорогу пішоходові.'], light:['Світлофор і велосипедиста враховано','Ви дотрималися червоного світла й пропустили велосипедиста.'],
+    left:['Зустрічний транспорт пропущено','Бездоганний поворот ліворуч.'], end:['Чиста зупинка','Бездоганна зупинка біля краю дороги.'] } },
+
+ru:{ name:'Русский', dir:'ltr',
+  cv:'Трёхмерный вид улицы и автомобиля автошколы', examiner:'Экзаменатор', camIn:'Камера: внутри', camOut:'Камера: снаружи',
+  points:'Баллы', minor:'Лёгкие ошибки', severe:'грубые', mirC:'Салонное зеркало', mirL:'Левое зеркало', mirR:'Правое зеркало', dial:'Спидометр',
+  look:'Через плечо', blink:'Поворотник', left:'слева', right:'справа', brake:'Тормоз', gas:'Газ', steer:'Руль', lang:'Язык',
+  formIntro:'Практический экзамен по вождению, категория B: тренировочная поездка', title:'Тренировка немецкого практического экзамена по вождению в 3D',
+  introText:'Экзаменатор даёт указания по-немецки. Руль, газ и тормоз — в ваших руках, и каждая ошибка фиксируется, как на настоящем экзамене.',
+  rules:[
+    'Перед началом движения, поворотом и остановкой в таком порядке: зеркало (боковое зеркало с той же стороны), поворотник, взгляд через плечо. Камера действительно поворачивается назад.',
+    'У бокового зеркала есть слепая зона. Велосипедиста прямо рядом с машиной видно только при взгляде через плечо.',
+    'Разрешённую скорость читайте на знаках — больше она нигде не указана.',
+    'Красный свет, знак «Стоп», преимущество в движении, столкновение и выезд на тротуар — грубые ошибки, означающие провал экзамена.',
+    'Каждый манёвр без ошибок приносит баллы, а с каждым правильным манёвром подряд растёт множитель. Одна ошибка обнуляет его.'],
+  touchHint:'Руль: удерживайте кнопку руля и тяните влево или вправо. Удерживайте газ и тормоз. Чтобы посмотреть в зеркало, коснитесь бокового зеркала.',
+  keysHint:'Клавиатура: <kbd>↑</kbd> газ, <kbd>↓</kbd> тормоз, <kbd>←</kbd> <kbd>→</kbd> руль, <kbd>Q</kbd> <kbd>E</kbd> поворотник влево/вправо, <kbd>2</kbd> <kbd>3</kbd> левое/правое зеркало, <kbd>1</kbd> <kbd>4</kbd> взгляд через левое/правое плечо, <kbd>V</kbd> камера. На зеркала можно также нажать мышью.',
+  sound:'Звуки двигателя, поворотника и баллов', voice:'Экзаменатор говорит вслух (по-немецки)', start:'Начать экзамен', install:'Установить как приложение',
+  failHead:'Грубая ошибка: не сдал',
+  failHint:'На настоящем экзамене экзаменатор здесь нажал бы на тормоз, и экзамен закончился бы. Можно продолжить тренировку на остальном маршруте; результат остаётся «не сдал».',
+  cont:'Продолжить тренировку', again:'Начать заново', resHead:'Протокол экзамена, категория B', pass:'Сдал', fail:'Не сдал',
+  verdict:(ok,se,mi,t)=>`${ok?'Сдал':'Не сдал'}: грубых ошибок ${se}, лёгких ошибок ${mi}, время ${t}`,
+  score:(s,max,best,rec)=>`Баллы: ${s} из ${max}`+(rec?', новый рекорд':best?`, ваш лучший результат ${best}`:''),
+  none:'Ошибок не зафиксировано.',
+  resHint:'Правило в этой игре упрощено: одна грубая или четыре лёгкие ошибки означают провал. На настоящем экзамене экзаменатор оценивает всю поездку целиком.',
+  unsupported:'Для этой игры нужен WebGL, и в этом браузере она не запустилась. Попробуйте в современном браузере.',
+  mult:n=>`, множитель ×${n}`,
+  wrong:['Не тот поворот','Вы съехали с маршрута экзаменатора. На настоящем экзамене это не ошибка; вас вернули на маршрут.'],
+  say:['Добрый день. Пожалуйста, начинайте движение и следуйте по дороге.','На следующем перекрёстке, пожалуйста, поверните направо.','На светофоре, пожалуйста, поверните направо.','На следующем перекрёстке, пожалуйста, поверните налево.','Пожалуйста, остановитесь справа у края дороги.','Спасибо, экзаменационная поездка окончена.'],
+  err:{
+    start_blinker:['Начало движения без поворотника','Вы тронулись без левого поворотника.'],
+    start_look:['Начало движения без взгляда через плечо','Перед началом движения вы не посмотрели через левое плечо.'],
+    start_traffic:['Опасность для транспорта при начале движения','Сзади ехала машина, а вы тронулись перед ней. Сначала нужно её пропустить.'],
+    speed:['Превышение разрешённой скорости','Вы ехали быстрее, чем разрешено.'],
+    speed_severe:['Значительное превышение скорости','Вы превысили разрешённую скорость более чем на 20 км/ч.'],
+    rvl_fast:['Слишком быстро на равнозначном перекрёстке','Перекрёсток без знаков: подъезжайте так медленно, чтобы успеть остановиться перед машиной справа.'],
+    rvl_violation:['Нарушено правило «помеха справа»','Перекрёсток без знаков: машина справа имеет преимущество.'],
+    rvl_stop:['Лишняя остановка при своём преимуществе','Машина ехала слева, преимущество было у вас. Остановка без причины — тоже ошибка.'],
+    stop_sign:['Знак «Стоп»: нет полной остановки','У знака «Стоп» машина должна полностью остановиться, даже если дорога пуста.'],
+    vorfahrt:['Не уступили дорогу','Машины на главной дороге имеют преимущество, а промежуток был слишком мал.'],
+    blinker_none:['Поворот без поворотника','Вы повернули без поворотника.'],
+    blinker_late:['Поворотник включён поздно','Вы включили поворотник слишком поздно. Он должен гореть ещё до того, как вы начнёте тормозить.'],
+    look_none:['Поворот без взгляда через плечо','Перед поворотом вы не посмотрели через плечо.'],
+    turn_fast:['Слишком быстрый поворот','Вы поворачивали слишком быстро.'],
+    zebra:['Не пропустили пешехода на «зебре»','Пешеход хотел перейти дорогу. Нужно было остановиться перед переходом.'],
+    red:['Проезд на красный свет','Вы проехали на красный свет.'],
+    cyclist:['Опасность для велосипедиста при повороте направо','Велосипедист справа от вас ехал прямо и имел преимущество. Взгляд через плечо показал бы его.'],
+    oncoming:['Не пропустили встречный транспорт при повороте налево','При повороте налево встречный транспорт имеет преимущество.'],
+    lane:['Нарушено правило правостороннего движения','Вы выехали из своей полосы на встречную.'],
+    curb:['Наезд на бордюр','Колесо заехало на бордюр.'],
+    gehweg:['Выезд на тротуар','Машина выехала на тротуар.'],
+    crash:['Столкновение','Вы попали в аварию.'],
+    end_blinker:['Остановка без поворотника','Вы остановились без правого поворотника.'],
+    end_look:['Остановка без взгляда через плечо','Перед остановкой вы не посмотрели через правое плечо.'],
+    end_far:['Остановка слишком далеко от края дороги','Останавливайтесь близко к правому бордюру.'],
+    end_missed:['Указание не выполнено','Вы не остановились там, где просил экзаменатор.'],
+    mirror_none:['Не посмотрели в зеркало','Перед этим манёвром вы не посмотрели в боковое зеркало с той же стороны.'],
+    order:['Неправильный порядок','Правильно: сначала зеркало, затем поворотник, затем взгляд через плечо.'] },
+  good:{
+    start:['Чистое начало движения','При начале движения всё сделано правильно.'], rvlA:['Правило «помеха справа» соблюдено','Вы пропустили машину справа.'],
+    rvlB:['Преимущество использовано правильно','Вы проехали без лишней остановки.'], stop:['Знак «Стоп» и преимущество соблюдены','Полная остановка и правильный выезд на главную дорогу.'],
+    zebra:['Пешеход пропущен','Вы уступили дорогу пешеходу.'], light:['Светофор и велосипедист учтены','Вы соблюли красный свет и пропустили велосипедиста.'],
+    left:['Встречный транспорт пропущен','Безупречный поворот налево.'], end:['Чистая остановка','Безупречная остановка у края дороги.'] } },
+};
+const DIGITS = {fa:'۰۱۲۳۴۵۶۷۸۹', ar:'٠١٢٣٤٥٦٧٨٩'};
+let lang = (() => {
+  try{ const s=localStorage.getItem('fp3d-lang'); if(TX[s]) return s; }catch(_){}
+  for(const l of navigator.languages||[navigator.language||'']){ const k=String(l).slice(0,2).toLowerCase(); if(TX[k]) return k; }
+  return 'en';
+})(), T = TX[lang], noGL = false, sayIdx = 0, onLang = null;   // onLang: refreshes game-state text once the game is set up
+const num = n => DIGITS[lang] ? String(n).replace(/\d/g, d => DIGITS[lang][d]) : String(n);
+function applyLang(code){
+  lang=code; T=TX[code];
+  try{ localStorage.setItem('fp3d-lang',code); }catch(_){}
+  const html=document.documentElement; html.lang=code; html.dir=T.dir;
+  for(const el of document.querySelectorAll('[data-t]')) el.textContent=T[el.dataset.t];
+  for(const el of document.querySelectorAll('[data-th]')) el.innerHTML=T[el.dataset.th];          // our own markup (<kbd>), never user input
+  for(const el of document.querySelectorAll('[data-ta]')) el.setAttribute('aria-label',el.dataset.ta.split(' ').map(k=>T[k]).join(' – '));
+  for(const id of ['ex-tr','toast','score','count','camBtn']) $(id).dir=T.dir;
+  $('ex-tr').lang=code; $('ex-tr').hidden=code==='de';
+  $('introText').textContent=noGL?T.unsupported:T.introText;
+  const rules=$('rules'); rules.textContent=''; for(const r of T.rules){ const li=document.createElement('li'); li.textContent=r; rules.appendChild(li); }
+  for(const b of $('langs').children) b.setAttribute('aria-pressed',String(b.dataset.lang===code));
+  showSay(sayIdx); if(onLang) onLang();
+}
+function showSay(i){ sayIdx=i; $('ex-de').textContent=SAY_DE[i]; $('ex-tr').textContent=T.say[i]; }
+for(const [code,L] of Object.entries(TX)){
+  const b=document.createElement('button'); b.type='button'; b.lang=code; b.dir=L.dir; b.dataset.lang=code; b.textContent=L.name;
+  b.addEventListener('click',()=>applyLang(code)); $('langs').appendChild(b);
+}
+applyLang(lang);
+
+// installable app: offline cache, plus an install button where the browser offers one (Chrome/Edge/Android)
+if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+let installEvt=null;
+addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEvt=e; $('installBtn').hidden=false; });
+addEventListener('appinstalled',()=>{ installEvt=null; $('installBtn').hidden=true; });
+$('installBtn').addEventListener('click',async()=>{ if(!installEvt) return; installEvt.prompt(); try{ await installEvt.userChoice; }catch(_){} installEvt=null; $('installBtn').hidden=true; });
+
+function unsupported(){ noGL=true; $('introText').textContent=T.unsupported; $('startBtn').disabled=true; }
 if(!window.THREE){ unsupported(); return; }
 let renderer;
 try{ renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'}); }catch(_){ unsupported(); return; }
@@ -317,45 +795,8 @@ function project(px,py,s0){
   return {s:best, lat:(px-q.x)*(-q.hy)+(py-q.y)*q.hx, dist:Math.sqrt(bd)};
 }
 
-/* ---------- examiner lines & error catalogue ---------- */
-const SAY = [
-  ['Guten Tag. Bitte fahren Sie los und folgen Sie dem Straßenverlauf.','روز بخیر. لطفاً حرکت کنید و همین خیابان را مستقیم بروید.'],
-  ['An der nächsten Kreuzung bitte rechts abbiegen.','در تقاطع بعدی لطفاً به راست بپیچید.'],
-  ['An der Ampel bitte rechts abbiegen.','سر چراغ راهنمایی لطفاً به راست بپیچید.'],
-  ['An der nächsten Kreuzung bitte links abbiegen.','در تقاطع بعدی لطفاً به چپ بپیچید.'],
-  ['Bitte halten Sie rechts am Fahrbahnrand an.','لطفاً سمت راست، کنار خیابان توقف کنید.'],
-  ['Vielen Dank, die Prüfungsfahrt ist beendet.','متشکرم، آزمون تمام شد.'],
-];
-const ERR = {
-  start_blinker:['Anfahren ohne Blinker','بدون راهنمای چپ راه افتادید.'],
-  start_look:['Anfahren ohne Schulterblick','قبل از راه افتادن از روی شانهٔ چپ نگاه نکردید.'],
-  start_traffic:['Fließenden Verkehr beim Anfahren gefährdet','ماشینی از پشت می‌آمد و شما جلویش راه افتادید. اول باید رد شود.',1],
-  speed:['Zulässige Geschwindigkeit überschritten','از سرعت مجاز بیشتر رفتید.'],
-  speed_severe:['Erhebliche Geschwindigkeitsüberschreitung','بیش از ۲۰ کیلومتر بالاتر از سرعت مجاز رفتید.',1],
-  rvl_fast:['Zu schnell an Rechts-vor-links-Kreuzung','تقاطع بدون تابلو: باید آن‌قدر آهسته برسید که بتوانید برای ماشین سمت راست بایستید.'],
-  rvl_violation:['Rechts vor links missachtet','تقاطع بدون تابلو: ماشینی که از راست می‌آید حق تقدم دارد.',1],
-  rvl_stop:['Unnötiges Anhalten trotz Vorfahrt','ماشین از چپ می‌آمد و حق تقدم با شما بود. توقف بی‌دلیل هم خطاست.'],
-  stop_sign:['Stoppschild: kein vollständiger Halt','جلوی تابلوی ایست ماشین باید کاملاً بایستد، حتی اگر خیابان خالی باشد.',1],
-  vorfahrt:['Vorfahrt missachtet','ماشین‌های خیابان اصلی حق تقدم دارند و فاصله کافی نبود.',1],
-  blinker_none:['Abbiegen ohne Blinker','بدون راهنما پیچیدید.'],
-  blinker_late:['Zu spät geblinkt','راهنما را دیر زدید. باید پیش از کم کردن سرعت روشن باشد.'],
-  look_none:['Abbiegen ohne Schulterblick','قبل از پیچیدن از روی شانه نگاه نکردید.'],
-  turn_fast:['Zu schnell abgebogen','سرعت پیچیدن زیاد بود.'],
-  zebra:['Fußgänger am Zebrastreifen nicht beachtet','عابر می‌خواست رد شود. باید پیش از خط‌کشی می‌ایستادید.',1],
-  red:['Rote Ampel überfahren','از چراغ قرمز رد شدید.',1],
-  cyclist:['Radfahrer beim Rechtsabbiegen gefährdet','دوچرخه‌سوار سمت راست شما مستقیم می‌رفت. حق تقدم با اوست و با Schulterblick دیده می‌شد.',1],
-  oncoming:['Gegenverkehr beim Linksabbiegen missachtet','موقع پیچیدن به چپ، ماشین روبه‌رو حق تقدم دارد.',1],
-  lane:['Rechtsfahrgebot missachtet','از خط خودتان بیرون رفتید و وارد مسیر روبه‌رو شدید.'],
-  curb:['Bordstein überfahren','چرخ روی جدول رفت.'],
-  gehweg:['Auf den Gehweg gefahren','ماشین وارد پیاده‌رو شد.',1],
-  crash:['Zusammenstoß','تصادف کردید.',1],
-  end_blinker:['Anhalten ohne Blinker','بدون راهنمای راست توقف کردید.'],
-  end_look:['Anhalten ohne Schulterblick','قبل از کنار زدن از روی شانهٔ راست نگاه نکردید.'],
-  end_far:['Zu weit vom Fahrbahnrand gehalten','برای توقف باید نزدیک جدول سمت راست بایستید.'],
-  end_missed:['Anweisung nicht befolgt','در جایی که ممتحن خواست توقف نکردید.'],
-  mirror_none:['Spiegelblick unterlassen','پیش از این مانور در آینهٔ بغلِ همان سمت نگاه نکردید.'],
-  order:['Reihenfolge nicht eingehalten: Spiegel – Blinker – Schulterblick','ترتیب درست: اول آینه، بعد راهنما، بعد نگاه از روی شانه.'],
-};
+/* ---------- serious errors end the test (texts live in TX) ---------- */
+const SEVERE = new Set(['start_traffic','speed_severe','rvl_violation','stop_sign','vorfahrt','zebra','red','cyclist','oncoming','gehweg','crash']);
 
 /* ---------- 3D scene ---------- */
 const scene=new THREE.Scene();
@@ -573,11 +1014,6 @@ function respawn(){
 }
 
 /* ---------- feedback ---------- */
-const GOOD={
-  start:['Sauber angefahren','راه افتادن بی‌نقص'], rvlA:['Rechts vor links beachtet','حق تقدم سمت راست را رعایت کردید'],
-  rvlB:['Vorfahrt richtig genutzt','بدون توقف بی‌دلیل رد شدید'], stop:['Stoppschild und Vorfahrt beachtet','ایست کامل و ورود درست به خیابان اصلی'],
-  zebra:['Fußgänger durchgelassen','به عابر راه دادید'], light:['Ampel und Radfahrer beachtet','چراغ قرمز و دوچرخه‌سوار را رعایت کردید'],
-  left:['Gegenverkehr durchgelassen','گردش به چپ بی‌نقص'], end:['Sauber angehalten','توقف بی‌نقص کنار خیابان'] };
 let ac=null, eng=null, engGain=null;
 function audioInit(){ if(!$('sound').checked) return;
   try{ if(!ac){ ac=new (window.AudioContext||window.webkitAudioContext)(); eng=ac.createOscillator(); eng.type='sawtooth';
@@ -588,39 +1024,47 @@ function sfx(kind){ if(!ac || !$('sound').checked) return;
   try{ const t=ac.currentTime, seq=kind==='good'?[[660,0],[990,0.09]]:kind==='bad'?[[150,0]]:[[1300,0]], dur=kind==='tick'?0.03:kind==='bad'?0.3:0.16;
     for(const [f,d] of seq){ const o=ac.createOscillator(), g=ac.createGain(); o.type=kind==='bad'?'square':'sine'; o.frequency.value=f;
       g.gain.setValueAtTime(kind==='tick'?0.04:0.08,t+d); g.gain.exponentialRampToValueAtTime(0.001,t+d+dur); o.connect(g); g.connect(ac.destination); o.start(t+d); o.stop(t+d+dur+0.02); } }catch(_){} }
-function scoreHud(){ $('pts').textContent=st.score; $('mult').textContent=st.streak>1?'×'+st.streak:''; }
+function scoreHud(){ $('pts').textContent=num(st.score); $('mult').textContent=st.streak>1?'×'+num(st.streak):''; }
 function award(id){ const S=st;
-  if(S.errors.length===S.mark){ S.streak++; const pts=100*S.streak; S.score+=pts; note(`+${pts}  ${GOOD[id][0]}`,GOOD[id][1]+(S.streak>1?`، ضریب ×${fa(S.streak)}`:''),true); sfx('good'); }
+  if(S.errors.length===S.mark){ S.streak++; const pts=100*S.streak, g=T.good[id]; S.score+=pts; note(`+${num(pts)}  ${g[0]}`,g[1]+(S.streak>1?T.mult(num(S.streak)):''),true); sfx('good'); }
   S.mark=S.errors.length; scoreHud(); }
 let toastTimer=0, resTimer=0;
-function note(de,fa_,good){ const t=$('toast'); t.classList.toggle('good',!!good); t.firstElementChild.textContent=de; t.lastElementChild.textContent=fa_; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),4500); }
+function note(head,text,good){ const t=$('toast'); t.classList.toggle('good',!!good); t.firstElementChild.textContent=head; t.lastElementChild.textContent=text; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),4500); }
+const errHead=e=>T.err[e.id][0]+(e.arg?` (${num(e.arg)} km/h)`:'');
+function counts(){ const S=st, mi=S.errors.filter(x=>!x.sev).length, se=S.errors.length-mi;
+  $('minor').textContent=num(mi); $('severe').textContent=num(se); $('sevwrap').hidden=!se; }
 function err(id,arg){
-  const S=st, e=ERR[id], sev=!!e[2], de=e[0]+(arg?` (${arg} km/h)`:'');
-  S.errors.push({id,sev,de,fa:e[1]}); S.streak=0; scoreHud(); sfx('bad');
-  if(sev){ S.mode='paused'; S.ghostUntil=S.T+5; keys.gas=keys.brake=keys.left=keys.right=false; $('fail-de').textContent=e[0]; $('fail-fa').textContent=e[1]; $('fail').classList.add('show'); }
-  else note(de,e[1]);
-  const mi=S.errors.filter(x=>!x.sev).length, se=S.errors.length-mi;
-  $('minor').textContent=fa(mi); $('severe').textContent=fa(se); $('sevwrap').hidden=!se;
+  const S=st, e={id,arg,sev:SEVERE.has(id)};
+  S.errors.push(e); S.streak=0; scoreHud(); sfx('bad');
+  if(e.sev){ S.mode='paused'; S.ghostUntil=S.T+5; keys.gas=keys.brake=keys.left=keys.right=false; S.failed=e; failSheet(); $('fail').classList.add('show'); }
+  else note(errHead(e),T.err[id][1]);
+  counts();
 }
+function failSheet(){ const e=st.failed; if(e){ $('fail-title').textContent=T.err[e.id][0]; $('fail-text').textContent=T.err[e.id][1]; } }
 function say(i){
-  $('ex-de').textContent=SAY[i][0]; $('ex-fa').textContent=SAY[i][1];
+  showSay(i);
   const b=$('examiner'); b.classList.remove('new'); void b.offsetWidth; b.classList.add('new');
-  try{ if($('voice').checked && window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(SAY[i][0]); u.lang='de-DE'; u.rate=0.95; speechSynthesis.speak(u); } }catch(_){}
+  try{ if($('voice').checked && window.speechSynthesis){ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(SAY_DE[i]); u.lang='de-DE'; u.rate=0.95; speechSynthesis.speak(u); } }catch(_){}
 }
 function finish(){
   const S=st; award('end'); S.mode='done'; S.ev.done=1; S.v=0; say(5);
-  const mi=S.errors.filter(x=>!x.sev).length, se=S.errors.length-mi, ok=!se && mi<4;
-  $('resSheet').className='sheet '+(ok?'good':'bad');
-  $('stamp').textContent=ok?'Bestanden':'Nicht bestanden';
-  $('verdict').textContent=(ok?'قبول':'مردود')+`: ${fa(se)} خطای جدی، ${fa(mi)} خطای سبک، زمان ⁦${fa(Math.floor(S.T/60))}:${fa(String(Math.floor(S.T%60)).padStart(2,'0'))}⁩`;
-  const stars=ok?(S.errors.length?2:3):(se?0:1); let best=0;
+  let best=0;
   try{ best=+localStorage.getItem('fp3d-best')||0; if(S.score>best) localStorage.setItem('fp3d-best',String(S.score)); }catch(_){}
-  $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
-  $('scoreline').textContent=`امتیاز ${fa(S.score)} از ${fa(3600)}`+(S.score>best&&best?'، رکورد تازه':best?`، بهترین شما ${fa(Math.max(best,S.score))}`:'');
-  const log=$('log'); log.textContent='';
-  if(!S.errors.length){ const li=document.createElement('li'); li.textContent='هیچ خطایی ثبت نشد.'; log.appendChild(li); }
-  for(const e of S.errors){ const li=document.createElement('li'); if(e.sev) li.className='sev'; const b=document.createElement('b'); b.textContent=e.de; li.appendChild(b); li.appendChild(document.createTextNode(e.fa)); log.appendChild(li); }
+  S.result={best}; resultSheet();
   resTimer=setTimeout(()=>$('result').classList.add('show'),900);
+}
+function resultSheet(){
+  const S=st; if(!S.result) return;
+  const mi=S.errors.filter(x=>!x.sev).length, se=S.errors.length-mi, ok=!se && mi<4, best=S.result.best, rec=!!best && S.score>best;
+  $('resSheet').className='sheet '+(ok?'good':'bad');
+  $('stamp').textContent=ok?T.pass:T.fail;
+  $('verdict').textContent=T.verdict(ok,num(se),num(mi),`\u2066${num(Math.floor(S.T/60))}:${num(String(Math.floor(S.T%60)).padStart(2,'0'))}\u2069`);
+  const stars=ok?(S.errors.length?2:3):(se?0:1);
+  $('stars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+  $('scoreline').textContent=T.score(num(S.score),num(3600),best&&!rec?num(best):0,rec);
+  const log=$('log'); log.textContent='';
+  if(!S.errors.length){ const li=document.createElement('li'); li.textContent=T.none; log.appendChild(li); }
+  for(const e of S.errors){ const li=document.createElement('li'); if(e.sev) li.className='sev'; const b=document.createElement('b'); b.textContent=errHead(e); li.appendChild(b); li.appendChild(document.createTextNode(T.err[e.id][1])); log.appendChild(li); }
 }
 
 /* ---------- simulation ---------- */
@@ -679,7 +1123,7 @@ function update(dt){
   const X=x=>p0<x&&p1>=x, F=x=>X(x-CARF);                  // centre / front bumper passes x for the first time
 
   // leaving the route or the road
-  if(pr.dist>12){ note('Falsch abgebogen','از مسیر ممتحن خارج شدید. در امتحان واقعی این خطا نیست؛ به مسیر برگشتید.'); respawn(); return; }
+  if(pr.dist>12){ note(...T.wrong); respawn(); return; }
   const onRoad=XS.some(k=>Math.abs(S.x-k)<HW+0.35) || YS.some(k=>Math.abs(S.y-k)<HW+0.35);
   if(!onRoad){ S.offT+=dt; if(S.offT>0.15){ err('gehweg'); respawn(); return; } } else S.offT=0;
   const inJ=JN.some(n=>Math.abs(s-n.sIn)<13 || (n.sArc!==undefined && s>n.sArc-6 && s<n.sArcEnd+9));
@@ -839,7 +1283,8 @@ const doBlink=side=>{ const S=st; if(S.mode!=='run') return;
   if(S.blink===side) S.blink=0; else { S.blink=side; S.blinkOn[side]=S.T; S.mirAtBlink[side]=S.lastMir[side]; } };
 const doLook=side=>{ if(st.mode==='run'){ st.look=side; st.lookUntil=st.T+1.5; st.lastLook[side]=st.T; } };
 const doMirror=side=>{ if(st.mode==='run') st.lastMir[side]=st.T; };
-function toggleCam(){ camMode=camMode==='chase'?'cockpit':'chase'; $('camBtn').textContent='Kamera: '+(camMode==='chase'?'außen':'innen'); }
+const camLabel=()=>{ $('camBtn').textContent=camMode==='chase'?T.camOut:T.camIn; };
+function toggleCam(){ camMode=camMode==='chase'?'cockpit':'chase'; camLabel(); }
 function hold(el,k){
   const dn=e=>{ e.preventDefault(); if(st.mode==='run') keys[k]=true; try{ el.setPointerCapture(e.pointerId); }catch(_){} }, up=()=>{ keys[k]=false; };
   el.addEventListener('pointerdown',dn); el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); el.addEventListener('lostpointercapture',up);
@@ -871,7 +1316,7 @@ window.addEventListener('blur',()=>{ keys.gas=keys.brake=keys.left=keys.right=fa
 function start(){
   clearTimeout(resTimer); reset(); st.mode='run'; audioInit(); scoreHud();
   for(const id of ['intro','fail','result']) $(id).classList.remove('show');
-  $('toast').classList.remove('show'); $('minor').textContent=fa(0); $('sevwrap').hidden=true;
+  $('toast').classList.remove('show'); counts();
   say(0);
 }
 $('startBtn').addEventListener('click',start);
@@ -896,7 +1341,7 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 reset(); resize();
-$('ex-de').textContent=SAY[0][0]; $('ex-fa').textContent=SAY[0][1];
+onLang=()=>{ camLabel(); scoreHud(); counts(); failSheet(); resultSheet(); }; onLang();
 window.__game={get st(){return st;},update,start,keys,doBlink,doLook,doMirror,toggleCam,pathAt,ROUTE,setSteer:v=>{touchSteer=v;},
   R:{nA,nB,nC,nD,nE,LINE_C,LINE_D,ZEBRA,END0,END1,SC_A,SC_C,SC_CYC,SC_E}};
 requestAnimationFrame(frame);
