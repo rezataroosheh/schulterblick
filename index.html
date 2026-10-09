@@ -6,6 +6,10 @@
 <meta name="description" content="3D practice game for the German practical driving test (class B)">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <title>Fahrprüfung 3D</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="theme-color" content="#00588c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Roboto+Condensed:wght@500;600;700&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
@@ -212,7 +216,7 @@ ul.log li.sev b::before{content:"✕ "}
       <p class="hint keys-hint" data-th="keysHint"></p>
       <label class="opt" style="margin-bottom:4px"><input type="checkbox" id="sound" checked> <span data-t="sound"></span></label>
       <label class="opt"><input type="checkbox" id="voice"> <span data-t="voice"></span></label>
-      <div class="btns"><button class="btn" id="startBtn" type="button" data-t="start"></button></div>
+      <div class="btns"><button class="btn" id="startBtn" type="button" data-t="start"></button><button class="btn ghost" id="installBtn" type="button" data-t="install" hidden></button></div>
     </div>
   </div>
 
@@ -270,7 +274,7 @@ de:{ name:'Deutsch', dir:'ltr',
     'Jedes fehlerfreie Manöver bringt Punkte, und mit jedem weiteren fehlerfreien Manöver in Folge steigt der Multiplikator. Ein Fehler setzt ihn zurück.'],
   touchHint:'Lenken: den Lenkknopf festhalten und nach links oder rechts ziehen. Gas und Bremse gedrückt halten. Für den Spiegelblick auf den Außenspiegel tippen.',
   keysHint:'Tastatur: <kbd>↑</kbd> Gas, <kbd>↓</kbd> Bremse, <kbd>←</kbd> <kbd>→</kbd> lenken, <kbd>Q</kbd> <kbd>E</kbd> Blinker links/rechts, <kbd>2</kbd> <kbd>3</kbd> Spiegel links/rechts, <kbd>1</kbd> <kbd>4</kbd> Schulterblick links/rechts, <kbd>V</kbd> Kamera. Die Spiegel lassen sich auch anklicken.',
-  sound:'Ton für Motor, Blinker und Punkte', voice:'Prüfer spricht laut (Deutsch)', start:'Prüfung starten',
+  sound:'Ton für Motor, Blinker und Punkte', voice:'Prüfer spricht laut (Deutsch)', start:'Prüfung starten', install:'Als App installieren',
   failHead:'Erheblicher Fehler: nicht bestanden',
   failHint:'In der echten Prüfung würde der Prüfer hier eingreifen und die Prüfung beenden. Sie können den Rest der Strecke weiter üben; das Ergebnis bleibt „nicht bestanden“.',
   cont:'Weiter üben', again:'Neu starten', resHead:'Prüfprotokoll, Klasse B', pass:'Bestanden', fail:'Nicht bestanden',
@@ -331,7 +335,7 @@ en:{ name:'English', dir:'ltr',
     'Every flawless manoeuvre scores points, and each correct manoeuvre in a row raises the multiplier. One mistake resets it.'],
   touchHint:'Steering: hold the steering knob and drag it left or right. Hold the gas and brake buttons. To check a mirror, tap the side mirror.',
   keysHint:'Keyboard: <kbd>↑</kbd> gas, <kbd>↓</kbd> brake, <kbd>←</kbd> <kbd>→</kbd> steer, <kbd>Q</kbd> <kbd>E</kbd> left/right indicator, <kbd>2</kbd> <kbd>3</kbd> left/right mirror, <kbd>1</kbd> <kbd>4</kbd> left/right shoulder check, <kbd>V</kbd> camera. You can also click the mirrors.',
-  sound:'Engine, indicator and score sounds', voice:'Examiner speaks aloud (in German)', start:'Start the test',
+  sound:'Engine, indicator and score sounds', voice:'Examiner speaks aloud (in German)', start:'Start the test', install:'Install as app',
   failHead:'Serious error: failed',
   failHint:'In the real test the examiner would brake here and the test would be over. You can keep practising on the rest of the route; the result stays “failed”.',
   cont:'Keep practising', again:'Start again', resHead:'Test report, class B', pass:'Passed', fail:'Failed',
@@ -392,7 +396,7 @@ ar:{ name:'العربية', dir:'rtl',
     'كل مناورة بلا أخطاء تمنحك نقاطاً، ومع كل مناورة صحيحة متتالية يرتفع المضاعِف. أي خطأ يعيده إلى البداية.'],
   touchHint:'المقود: أمسك زر المقود واسحبه يميناً أو يساراً. اضغط مطوّلاً على البنزين والفرامل. للنظر في المرآة اضغط على المرآة الجانبية.',
   keysHint:'لوحة المفاتيح: <kbd>↑</kbd> بنزين، <kbd>↓</kbd> فرامل، <kbd>←</kbd> <kbd>→</kbd> توجيه، <kbd>Q</kbd> و<kbd>E</kbd> الإشارة يساراً ويميناً، <kbd>2</kbd> و<kbd>3</kbd> المرآة اليسرى واليمنى، <kbd>1</kbd> و<kbd>4</kbd> النظر من فوق الكتف الأيسر والأيمن، <kbd>V</kbd> الكاميرا. يمكن أيضاً النقر على المرايا بالفأرة.',
-  sound:'أصوات المحرك والإشارة والنقاط', voice:'الممتحن يتكلم بصوت مسموع (بالألمانية)', start:'ابدأ الاختبار',
+  sound:'أصوات المحرك والإشارة والنقاط', voice:'الممتحن يتكلم بصوت مسموع (بالألمانية)', start:'ابدأ الاختبار', install:'تثبيت كتطبيق',
   failHead:'خطأ جسيم: راسب',
   failHint:'في الاختبار الحقيقي كان الممتحن سيضغط على الفرامل هنا وينتهي الاختبار. يمكنك متابعة التدرب على بقية الطريق، لكن النتيجة تبقى رسوباً.',
   cont:'متابعة التدريب', again:'ابدأ من جديد', resHead:'محضر الاختبار، الفئة B', pass:'ناجح', fail:'راسب',
@@ -453,7 +457,7 @@ tr:{ name:'Türkçe', dir:'ltr',
     'Her hatasız manevra puan kazandırır; art arda yapılan her doğru manevrayla çarpan yükselir. Tek bir hata çarpanı sıfırlar.'],
   touchHint:'Direksiyon: direksiyon düğmesini tutup sola ya da sağa çekin. Gaz ve frene basılı tutun. Aynaya bakmak için yan aynaya dokunun.',
   keysHint:'Klavye: <kbd>↑</kbd> gaz, <kbd>↓</kbd> fren, <kbd>←</kbd> <kbd>→</kbd> direksiyon, <kbd>Q</kbd> <kbd>E</kbd> sol/sağ sinyal, <kbd>2</kbd> <kbd>3</kbd> sol/sağ ayna, <kbd>1</kbd> <kbd>4</kbd> sol/sağ omuz kontrolü, <kbd>V</kbd> kamera. Aynalara fareyle de tıklanabilir.',
-  sound:'Motor, sinyal ve puan sesleri', voice:'Sınav görevlisi sesli konuşsun (Almanca)', start:'Sınava başla',
+  sound:'Motor, sinyal ve puan sesleri', voice:'Sınav görevlisi sesli konuşsun (Almanca)', start:'Sınava başla', install:'Uygulama olarak yükle',
   failHead:'Ağır hata: kaldınız',
   failHint:'Gerçek sınavda görevli burada frene basar ve sınav biterdi. Yolun geri kalanında alıştırmaya devam edebilirsiniz; sonuç “kaldı” olarak kalır.',
   cont:'Alıştırmaya devam', again:'Yeniden başla', resHead:'Sınav tutanağı, B sınıfı', pass:'Geçti', fail:'Kaldı',
@@ -514,7 +518,7 @@ fa:{ name:'فارسی', dir:'rtl',
     'هر مانور بی‌نقص امتیاز دارد و با هر مانور درستِ پشت‌سرهم ضریب بالا می‌رود. یک خطا ضریب را صفر می‌کند.'],
   touchHint:'فرمان: دکمهٔ فرمان را بگیرید و به چپ یا راست بکشید. گاز و ترمز را نگه دارید. برای نگاه در آینه روی آینهٔ بغل بزنید.',
   keysHint:'صفحه‌کلید: <kbd>↑</kbd> گاز، <kbd>↓</kbd> ترمز، <kbd>←</kbd> <kbd>→</kbd> فرمان، <kbd>Q</kbd> و <kbd>E</kbd> راهنمای چپ و راست، <kbd>2</kbd> و <kbd>3</kbd> آینهٔ چپ و راست، <kbd>1</kbd> و <kbd>4</kbd> نگاه از روی شانهٔ چپ و راست، <kbd>V</kbd> دوربین. آینه‌ها را با ماوس هم می‌شود زد.',
-  sound:'صدای موتور، راهنما و امتیاز', voice:'ممتحن با صدا حرف بزند (آلمانی)', start:'شروع آزمون',
+  sound:'صدای موتور، راهنما و امتیاز', voice:'ممتحن با صدا حرف بزند (آلمانی)', start:'شروع آزمون', install:'نصب به‌عنوان برنامه',
   failHead:'خطای جدی: مردود',
   failHint:'در امتحان واقعی ممتحن همین‌جا ترمز می‌گرفت و آزمون تمام بود. می‌توانید بقیهٔ مسیر را تمرین کنید؛ نتیجه مردود می‌ماند.',
   cont:'ادامهٔ تمرین', again:'شروع دوباره', resHead:'برگهٔ نتیجهٔ آزمون، کلاس B', pass:'قبول', fail:'مردود',
@@ -575,7 +579,7 @@ uk:{ name:'Українська', dir:'ltr',
     'Кожен маневр без помилок приносить бали, а з кожним правильним маневром поспіль зростає множник. Одна помилка обнуляє його.'],
   touchHint:'Кермо: утримуйте кнопку керма й тягніть ліворуч або праворуч. Утримуйте газ і гальмо. Щоб глянути в дзеркало, торкніться бокового дзеркала.',
   keysHint:'Клавіатура: <kbd>↑</kbd> газ, <kbd>↓</kbd> гальмо, <kbd>←</kbd> <kbd>→</kbd> кермо, <kbd>Q</kbd> <kbd>E</kbd> поворотник ліворуч/праворуч, <kbd>2</kbd> <kbd>3</kbd> ліве/праве дзеркало, <kbd>1</kbd> <kbd>4</kbd> погляд через ліве/праве плече, <kbd>V</kbd> камера. На дзеркала можна також клацнути мишею.',
-  sound:'Звуки двигуна, поворотника й балів', voice:'Екзаменатор говорить уголос (німецькою)', start:'Почати іспит',
+  sound:'Звуки двигуна, поворотника й балів', voice:'Екзаменатор говорить уголос (німецькою)', start:'Почати іспит', install:'Встановити як застосунок',
   failHead:'Груба помилка: не склав',
   failHint:'На справжньому іспиті екзаменатор тут натиснув би на гальмо, і іспит закінчився б. Можна далі тренуватися на решті маршруту; результат лишається «не склав».',
   cont:'Тренуватися далі', again:'Почати знову', resHead:'Протокол іспиту, категорія B', pass:'Склав', fail:'Не склав',
@@ -636,7 +640,7 @@ ru:{ name:'Русский', dir:'ltr',
     'Каждый манёвр без ошибок приносит баллы, а с каждым правильным манёвром подряд растёт множитель. Одна ошибка обнуляет его.'],
   touchHint:'Руль: удерживайте кнопку руля и тяните влево или вправо. Удерживайте газ и тормоз. Чтобы посмотреть в зеркало, коснитесь бокового зеркала.',
   keysHint:'Клавиатура: <kbd>↑</kbd> газ, <kbd>↓</kbd> тормоз, <kbd>←</kbd> <kbd>→</kbd> руль, <kbd>Q</kbd> <kbd>E</kbd> поворотник влево/вправо, <kbd>2</kbd> <kbd>3</kbd> левое/правое зеркало, <kbd>1</kbd> <kbd>4</kbd> взгляд через левое/правое плечо, <kbd>V</kbd> камера. На зеркала можно также нажать мышью.',
-  sound:'Звуки двигателя, поворотника и баллов', voice:'Экзаменатор говорит вслух (по-немецки)', start:'Начать экзамен',
+  sound:'Звуки двигателя, поворотника и баллов', voice:'Экзаменатор говорит вслух (по-немецки)', start:'Начать экзамен', install:'Установить как приложение',
   failHead:'Грубая ошибка: не сдал',
   failHint:'На настоящем экзамене экзаменатор здесь нажал бы на тормоз, и экзамен закончился бы. Можно продолжить тренировку на остальном маршруте; результат остаётся «не сдал».',
   cont:'Продолжить тренировку', again:'Начать заново', resHead:'Протокол экзамена, категория B', pass:'Сдал', fail:'Не сдал',
@@ -710,6 +714,14 @@ for(const [code,L] of Object.entries(TX)){
   b.addEventListener('click',()=>applyLang(code)); $('langs').appendChild(b);
 }
 applyLang(lang);
+
+// installable app: offline cache, plus an install button where the browser offers one (Chrome/Edge/Android)
+if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+let installEvt=null;
+addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEvt=e; $('installBtn').hidden=false; });
+addEventListener('appinstalled',()=>{ installEvt=null; $('installBtn').hidden=true; });
+$('installBtn').addEventListener('click',async()=>{ if(!installEvt) return; installEvt.prompt(); try{ await installEvt.userChoice; }catch(_){} installEvt=null; $('installBtn').hidden=true; });
+
 function unsupported(){ noGL=true; $('introText').textContent=T.unsupported; $('startBtn').disabled=true; }
 if(!window.THREE){ unsupported(); return; }
 let renderer;
